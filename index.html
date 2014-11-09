@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta content="text/html" charset="utf-8">
+    <link href="content/css/index.css" type="text/css" rel="stylesheet">
+
+    <!--control-->
+    <link href="bower_components/yyctoolbox/control/dom/button/button.css" type="text/css" rel="stylesheet">
+
+</head>
+<body style="background-color: black;">
+<div id="gameBody">
+    <div id="index" class="index">
+        <div id="singlePlayerArea">
+            <span>单人游戏</span>
+        </div>
+    </div>
+    <div id="loading" class="loading">
+        <p></p>
+        <span id="loadingMessage"></span>
+        <span id="enterGame">加载完成，点击进入游戏</span>
+    </div>
+    <div id="gameArea" class="gameArea">
+        <div id="meat"></div>
+        <div id="systemIco">
+            <img src="content/image/interface/menuIco.png">
+        </div>
+        <div id="spriteInfo">
+            <div id="basicInfo"></div>
+            <div id="moreInfo"></div>
+        </div>
+        <div id="gameInfo" style="-webkit-user-select:none;" oncontextmenu="return false;">
+        </div>
+        <div id="downLeftPanel">
+            <div id="farmerPanel">
+                <input type="button" id="build_base">
+                <input type="button" id="build_tower">
+                <input type="button" id="build_shootingRange">
+            </div>
+            <div id="basePanel">
+                <input type="button" id="produce_farmer">
+            </div>
+            <div id="shootingRangePanel">
+                <input type="button" id="produce_archer">
+            </div>
+            <div id="command">
+                <input type="button" id="moveAndAttack">
+            </div>
+
+        </div>
+        <div id="menu">
+        </div>
+        <div id="dialogue"></div>
+        <canvas id="mapLayerCanvas" width="800" height="430"></canvas>
+        <canvas id="smallMapBackgroundLayerCanvas" width="800" height="430"></canvas>
+        <canvas id="smallMapEntityLayerCanvas" width="800" height="430"></canvas>
+        <canvas id="smallMapFogLayerCanvas" width="800" height="430"></canvas>
+        <canvas id="smallMapEffectLayerCanvas" width="800" height="430"></canvas>
+        <canvas id="entityLayerCanvas" width="800" height="430"></canvas>
+        <canvas id="bulletLayerCanvas" width="800" height="430"></canvas>
+        <canvas id="fogLayerCanvas" width="820" height="430"></canvas>
+        <canvas id="effectLayerCanvas" width="800" height="430"></canvas>
+    </div>
+</div>
+<div id="systemInfo">
+</div>
+
+<script src="bower_components/yoop/yOOP.min.js"></script>
+<script src="bower_components/yengine2d/dist/yEngine2D.js"></script>
+
+
+<script>
+    YE.main.setConfig({
+        isDebug: false,
+        isSingleEngineFile: true,
+        userFilePaths: [
+            "bower_components/jquery/jquery.js",
+            "bower_components/yyctoolbox/tool/yTool.js",
+            "bower_components/yyctoolbox/control/dom/button/Button.js",
+            "bower_components/yyctoolbox/pattern/designPattern/Observer.js",
+
+            "src/ai/trigger.js",
+
+            "src/layer/SmallMapLayer.js",
+            "src/layer/SmallMapBackgroundLayer.js",
+            "src/layer/SmallMapEntityLayer.js",
+            "src/layer/SmallMapFogLayer.js",
+            "src/layer/SmallMapEffectLayer.js",
+            "src/layer/MapLayer.js",
+            "src/layer/MapRoll.js",
+            "src/layer/MapSelect.js",
+            "src/layer/EffectLayer.js",
+            "src/layer/EntityLayer.js",
+            "src/layer/FogLayer.js",
+
+            "src/sprite/Sprite.js",
+            "src/sprite/SelectableSprite.js",
+            "src/sprite/EntitySprite.js",
+
+            "src/sprite/BuildingSprite.js",
+            "src/sprite/building/ShootingRangeSprite.js",
+            "src/sprite/building/BaseSprite.js",
+            "src/sprite/building/TowerSprite.js",
+
+            "src/sprite/buildingEffect/FlamingSprite.js",
+
+            "src/sprite/CharacterSprite.js",
+            "src/sprite/unit/ArcherSprite.js",
+            "src/sprite/unit/FarmerSprite.js",
+
+            "src/sprite/bullet/ArrowSprite.js",
+
+            "src/sprite/ResourceSprite.js",
+            "src/sprite/resource/FoodSprite.js",
+
+            "src/sprite/TerrainSprite.js",
+            "src/sprite/terrain/MoutainSprite.js",
+            "src/sprite/terrain/PlantsSprite.js",
+
+            "src/data/levelData.js",
+            "src/data/resourceTable.js",
+
+            "src/algorithm/shadeAlgorithm.js",
+            "src/algorithm/FindPath.js",
+            "src/algorithm/Steer.js",
+            "src/algorithm/produceAlgorithm.js",
+            "src/algorithm/combatAlgorithm.js",
+            "src/algorithm/moveAlgorithm.js",
+
+            "src/action/Command.js",
+            "src/action/action.js",
+
+            "src/cache/AnimPool.js",
+
+            "src/config.js",
+            "src/tool.js",
+            "src/ui.js",
+            "src/Scene.js",
+            "src/LevelManager.js"
+        ],
+        onload: function () {
+            ui.initHtml();
+            ui.initEvent();
+        }
+    });
+</script>
+</body>
+</html>

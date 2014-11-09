@@ -1,0 +1,28 @@
+{
+    "frames": {
+        "building_build_00": [552, 2, 273, 156],
+        "building_build_01": [277, 2, 273, 156],
+        "building_build_02": [2, 2, 273, 156],
+        "building_damage_00": [1627, 91, 123, 87],
+        "building_damage_01": [1689, 2, 123, 87],
+        "building_damage_02": [1564, 2, 123, 87],
+        "building_damage_03": [1502, 91, 123, 87],
+        "building_damage_04": [1439, 2, 123, 87],
+        "building_damage_05": [1377, 91, 123, 87],
+        "building_damage_06": [1314, 2, 123, 87],
+        "building_damage_07": [1252, 91, 123, 87],
+        "building_damage_08": [1189, 2, 123, 87],
+        "building_damage_09": [1127, 91, 123, 87],
+        "building_damage_10": [1064, 2, 123, 87],
+        "building_damage_11": [1002, 126, 123, 87],
+        "building_damage_12": [877, 126, 123, 87],
+        "building_damage_13": [752, 160, 123, 87],
+        "building_damage_14": [627, 160, 123, 87],
+        "building_damage_15": [502, 160, 123, 87],
+        "building_damage_16": [377, 160, 123, 87],
+        "building_damage_17": [252, 160, 123, 87],
+        "building_damage_18": [127, 160, 123, 87],
+        "building_damage_19": [2, 160, 123, 87],
+        "building_ruin": [827, 2, 235, 122]
+    }
+}

@@ -1,0 +1,77 @@
+{
+  "name": "chokidar",
+  "description": "A neat wrapper around node.js fs.watch / fs.watchFile / fsevents.",
+  "version": "0.10.5",
+  "keywords": [
+    "fs",
+    "watch",
+    "watchFile",
+    "watcher",
+    "watching",
+    "file",
+    "fsevents"
+  ],
+  "homepage": "https://github.com/paulmillr/chokidar",
+  "author": {
+    "name": "Paul Miller",
+    "url": "http://paulmillr.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/paulmillr/chokidar.git"
+  },
+  "bugs": {
+    "url": "http://github.com/paulmillr/chokidar/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://github.com/paulmillr/chokidar/raw/master/README.md"
+    }
+  ],
+  "scripts": {
+    "test": "mocha"
+  },
+  "files": [
+    "index.js"
+  ],
+  "devDependencies": {
+    "mocha": "~2.0.0",
+    "chai": "~1.9.2",
+    "sinon": "~1.10.3",
+    "sinon-chai": "~2.6.0"
+  },
+  "optionalDependencies": {
+    "fsevents": "~0.3.1"
+  },
+  "dependencies": {
+    "readdirp": "~1.1.0",
+    "async-each": "~0.1.5",
+    "fsevents": "~0.3.1"
+  },
+  "gitHead": "704d80225175b9eaa1464f4c71deefcaaee57765",
+  "_id": "chokidar@0.10.5",
+  "_shasum": "4a5f343c4562cd2c48fa9e6531c3feebe21eaf79",
+  "_from": "chokidar@>=0.8.2",
+  "_npmVersion": "2.0.0",
+  "_npmUser": {
+    "name": "es128",
+    "email": "elan.shanker+npm@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "paulmillr",
+      "email": "paul@paulmillr.com"
+    },
+    {
+      "name": "es128",
+      "email": "elan.shanker+npm@gmail.com"
+    }
+  ],
+  "dist": {
+    "shasum": "4a5f343c4562cd2c48fa9e6531c3feebe21eaf79",
+    "tarball": "http://registry.npmjs.org/chokidar/-/chokidar-0.10.5.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/chokidar/-/chokidar-0.10.5.tgz"
+}

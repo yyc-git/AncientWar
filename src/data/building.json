@@ -1,0 +1,10 @@
+{
+    "frames":{
+        "base_blue":[313,296,309,203],
+        "base_red":[2,296,309,203],
+        "shootingRange_blue":[344,2,340,292],
+        "shootingRange_red":[2,2,340,292],
+        "tower_blue":[686,240,116,236],
+        "tower_red":[686,2,116,236]
+    }
+}

@@ -1,0 +1,254 @@
+html, body, p {
+    margin: 0;
+}
+
+#systemInfo {
+    position: absolute;
+    top: 100px;
+    left: 80%;
+    color: white;
+    font-size: 20px;
+}
+
+#gameBody {
+    position: absolute;
+}
+
+.index {
+    background-image: url(../image/interface/index.png);
+    background-repeat: no-repeat;
+    background-size: 800px 600px;
+    width: 800px;
+    height: 600px
+}
+
+.index #singlePlayerArea {
+    position: relative;
+    top: 15px;
+    left: 315px;
+    /*border: 1px solid red;*/
+    width: 110px;
+    height: 180px;
+    background-repeat: no-repeat;
+    background-size: 110px 180px;
+}
+
+/*.index.css #singlePlayerArea:hover {*/
+/*background-image: url(../image/interface/single_hover.png);*/
+/*}*/
+
+.index #singlePlayerArea span {
+    font-size: 18px;
+    color: #ffffff;
+    text-align: center;
+    display: block;
+    padding-top: 6px;
+}
+
+.index #editArea {
+    position: relative;
+    top: 90px;
+    left: 195px;
+    /*border: 1px solid red;*/
+    width: 70px;
+    height: 90px;
+    /*background-repeat: no-repeat;*/
+    /*background-size: 90px 180px;*/
+}
+
+.index #editArea span {
+    font-size: 12px;
+    color: #ffffff;
+    text-align: center;
+    display: block;
+    padding-top: 6px;
+}
+
+.edit {
+    display: none;
+    font-size: 22px;
+    color: #ffffff;
+    padding-top: 6px;
+}
+
+.loading {
+    display: none;
+    background-image: url(../image/interface/loading.png);
+    background-repeat: no-repeat;
+    background-size: 800px 600px;
+    width: 800px;
+    height: 600px;
+    /*position: relative;*/
+}
+
+.loading p {
+    font-size: 24px;
+    text-align: center;
+    width: 100%;
+    color: #000000;
+    display: block;
+    position: absolute;
+    top: 150px;
+    left: 0px;
+}
+
+.loading span {
+    font-size: 30px;
+    font-weight: bolder;
+    text-align: center;
+    cursor: pointer;
+    width: 100%;
+    color: red;
+    display: block;
+    position: absolute;
+    top: 350px;
+    left: 0px;
+}
+
+.loading #enterGame {
+    display: none;
+}
+
+.gameArea {
+    display: none;
+    background-image: url(../image/interface/main.png);
+    background-repeat: no-repeat;
+    background-size: 800px 600px;
+    width: 800px;
+    height: 600px;
+    /*position: relative;*/
+    /*border: 1px solid red;*/
+}
+
+.gameArea #meat {
+    position: absolute;
+    top: 5px;
+    left: 110px;
+    font-size: 16px;
+    color: white;
+}
+
+.gameArea #spriteInfo {
+    position: absolute;
+    top: 480px;
+    left: 250px;
+    font-size: 16px;
+    line-height: 1;
+    color: #000000;
+}
+
+.gameArea #gameInfo {
+    z-index: 100;
+    position: absolute;
+    top: 330px;
+    left: 0px;
+    font-size: 22px;
+    text-align: center;
+    width: 100%;
+    color: #ffffff;
+}
+
+.gameArea #downLeftPanel {
+    position: absolute;
+    top: 480px;
+    left: 20px;
+}
+
+.gameArea #downLeftPanel input[type="button"] {
+    width: 36px;
+    height: 36px;
+    border-width: 0px;
+    padding: 0px;
+    background-image: url(../image/interface/ico.png);
+}
+
+.gameArea #farmerPanel {
+    display: none;
+}
+
+.gameArea #farmerPanel #build_base {
+    background-position: 0px -144px;
+}
+
+.gameArea #farmerPanel #build_tower {
+    background-position: 0px -108px;
+}
+
+.gameArea #farmerPanel #build_shootingRange {
+    background-position: 0px -72px;
+}
+
+.gameArea #basePanel {
+    display: none;
+}
+
+.gameArea #basePanel #produce_farmer {
+    background-position: 0px 0px;
+}
+
+.gameArea #shootingRangePanel {
+    display: none;
+}
+
+.gameArea #shootingRangePanel #produce_archer {
+    background-position: 0px -36px;
+}
+
+.gameArea #command {
+    display: none;
+}
+
+.gameArea #command #moveAndAttack {
+    background-position: 0px -180px;
+}
+
+.gameArea #menu {
+    display: none;
+    background-image: url(../image/interface/menuBackground.png);
+    background-repeat: no-repeat;
+    background-size: 300px 300px;
+    position: absolute;
+    top: 100px;
+    left: 220px;
+    z-index: 1000;
+    width: 300px;
+    height: 300px;
+    padding-top: 40px;
+}
+
+.gameArea #menu .button {
+    margin: auto;
+}
+
+.gameArea #dialogue {
+    display: none;
+    background-image: url(../image/interface/dialogue.png);
+    background-repeat: no-repeat;
+    background-size: 300px 300px;
+    position: absolute;
+    top: 100px;
+    left: 220px;
+    z-index: 1000;
+
+    font-size: 20px;
+    font-weight: bolder;
+    color: white;
+    width: 300px;
+    height: 300px;
+    text-align: center;
+    padding-top: 40px;
+}
+
+.gameArea #dialogue a {
+    color: white;
+}
+
+.gameArea #systemIco {
+    position: absolute;
+    top: 2px;
+    /*left: 610px;*/
+    right: 20px;
+    /*border: 1px solid red;*/
+    /*font-size: 16px;*/
+    /*color: white;*/
+}
