@@ -7,10 +7,10 @@
     ],
     "description": "HTML5 RTS game based on YEngine2D",
     "ignore": [
-        "bower_components",
-        "src",
-        "test",
+        "server",
         "node_modules",
+        "bower_components",
+        "test",
         "bower.json",
         "gruntfile.js",
         "package.json",
