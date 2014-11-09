@@ -11,6 +11,7 @@
 下载GitHub项目，运行index.html
 ##测试
 ```js
+npm install
 grunt test
 ```
 ##文档
