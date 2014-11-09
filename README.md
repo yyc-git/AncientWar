@@ -8,11 +8,7 @@
 
 ![游戏截图](http://images.cnitblog.com/blog/419321/201411/092254360815863.png)
 ##运行
-通过bower安装项目
-```js
-bower install ancient-war
-```
-运行index.html
+下载GitHub项目，运行index.html
 ##测试
 ```js
 grunt test
