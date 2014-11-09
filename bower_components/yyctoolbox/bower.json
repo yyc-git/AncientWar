@@ -1,0 +1,17 @@
+{
+    "name": "yyctoolbox",
+    "version": "1.0.0",
+    "homepage": "https://github.com/yyc-git/YYCToolBox",
+    "authors": {
+        "name": "YYC",
+        "email": "395976266@qq.com",
+        "qq": "395976266",
+        "blog": "http://www.cnblogs.com/chaogex/"
+    },
+    "description": "ToolBox of YYC",
+    "keywords": [
+        "ToolBox",
+        "YYC"
+    ],
+    "license": "MIT"
+}
