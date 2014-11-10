@@ -67,46 +67,60 @@
                 return  levelData[this.currentLevel];
             },
             startCurrentLevel: function () {
-                var loaderManager = YE.LoaderManager.getInstance();
+                var loaderManager = YE.LoaderManager.getInstance(),
+                    isLoaded = false,
+                    self = this;
 
                 this._resetLevel();
 
                 ui.showLevelBrif(this.getLevelData().brief);
 
+                loaderManager.preload(this._getLevelResource());
+
                 loaderManager.onloading = function (currentLoad, resCount) {
                     ui.showLoadingMessage("正在加载第" + currentLoad + "/" + resCount + "个资源");
                 };
                 loaderManager.onload = function () {
-                    ui.showLoadingMessage("正在初始化动画");
-
-                    YE.FrameCache.getInstance().addFrameData("arrow_json", "arrow_image");
-                    YE.AnimationCache.getInstance().addAnimWithFile("anim_arrow_json");
-
-                    YE.FrameCache.getInstance().addFrameData("archer_json", "archer_image");
-                    YE.AnimationCache.getInstance().addAnimWithFile("anim_archer_json");
-
-                    YE.FrameCache.getInstance().addFrameData("farmer_json", "farmer_image");
-                    YE.AnimationCache.getInstance().addAnimWithFile("anim_farmer_json");
-
-                    YE.FrameCache.getInstance().addFrameData("buildingEffect_json", "buildingEffect_image");
-                    YE.AnimationCache.getInstance().addAnimWithFile("anim_buildingEffect_json");
-
-                    //延迟50ms执行，从而在显示"正在初始化弓箭手和农民动画"后再执行初始化；
-                    //如果不延迟，初始化会阻塞ui线程，从而“ui.showLoadingMessage("正在初始化弓箭手和农民动画");”会在完成初始化后才执行
-                    setTimeout(function () {
-                        var animPool = AnimPool.getInstance();
-
-                        animPool.initWithFile("anim_archer_json");
-                        animPool.initWithFile("anim_arrow_json");
-                        animPool.initWithFile("anim_farmer_json");
-                        animPool.initWithFile("anim_buildingEffect_json");
-
-//
-                        ui.showEnterGame();
-                    }, 50);
+                    isLoaded = true;
+                    self.initAnimation();
                 };
 
-                loaderManager.preload(this._getLevelResource());
+                setTimeout(function () {
+                     if(!isLoaded){
+                         loaderManager.onloading = function (currentLoad, resCount) {
+                         };
+                         ui.showLoadErrorMessage("加载声音失败！<br/>您可以刷新浏览器重新试下，或者点击我跳过声音加载！");
+                     }
+                }, 40000);
+            },
+            initAnimation: function () {
+                ui.showLoadingMessage("正在初始化动画");
+
+                YE.FrameCache.getInstance().addFrameData("arrow_json", "arrow_image");
+                YE.AnimationCache.getInstance().addAnimWithFile("anim_arrow_json");
+
+                YE.FrameCache.getInstance().addFrameData("archer_json", "archer_image");
+                YE.AnimationCache.getInstance().addAnimWithFile("anim_archer_json");
+
+                YE.FrameCache.getInstance().addFrameData("farmer_json", "farmer_image");
+                YE.AnimationCache.getInstance().addAnimWithFile("anim_farmer_json");
+
+                YE.FrameCache.getInstance().addFrameData("buildingEffect_json", "buildingEffect_image");
+                YE.AnimationCache.getInstance().addAnimWithFile("anim_buildingEffect_json");
+
+                //延迟50ms执行，从而在显示"正在初始化弓箭手和农民动画"后再执行初始化；
+                //如果不延迟，初始化会阻塞ui线程，从而“ui.showLoadingMessage("正在初始化弓箭手和农民动画");”会在完成初始化后才执行
+                setTimeout(function () {
+                    var animPool = AnimPool.getInstance();
+
+                    animPool.initWithFile("anim_archer_json");
+                    animPool.initWithFile("anim_arrow_json");
+                    animPool.initWithFile("anim_farmer_json");
+                    animPool.initWithFile("anim_buildingEffect_json");
+
+//
+                    ui.showEnterGame();
+                }, 50);
             },
             enterGame: function () {
                 var triggers = this.getLevelData().triggers,

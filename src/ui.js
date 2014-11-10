@@ -10,8 +10,13 @@
         showLoadingMessage: function (msg) {
             $("#enterGame").hide();
             $("#loadingMessage").show();
-            $("#loadingMessage").text(msg);
+            $("#loadingMessage").html(msg);
             $("#systemInfo").hide();
+        },
+        showLoadErrorMessage: function (msg) {
+            $("#loadError").show();
+            $("#loadError").html(msg);
+            $("#loadingMessage").hide();
         },
         showEnterGame: function () {
             $("#loadingMessage").hide();
@@ -103,21 +108,25 @@
                 LevelManager.getInstance().start();
             });
 
-            $("#editArea").click(function () {
-                $("#index").hide();
-                $("#edit").show();
-            });
+//            $("#editArea").click(function () {
+//                $("#index").hide();
+//                $("#edit").show();
+//            });
 
-            $("#mapEdit").click(function () {
-                window.location.href = "./mapEdit.html";
-            });
-            $("#animEdit").click(function () {
-                window.location.href = "./animEdit.html";
-            });
-            $("#imgEdit").click(function () {
-                window.location.href = "./imgEdit.html";
-            });
+//            $("#mapEdit").click(function () {
+//                window.location.href = "./mapEdit.html";
+//            });
+//            $("#animEdit").click(function () {
+//                window.location.href = "./animEdit.html";
+//            });
+//            $("#imgEdit").click(function () {
+//                window.location.href = "./imgEdit.html";
+//            });
 
+            $("#loadError").click(function () {
+                $(this).hide();
+                LevelManager.getInstance().initAnimation();
+            });
 
             $("#enterGame").click(function () {
                 LevelManager.getInstance().enterGame();
