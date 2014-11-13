@@ -55,14 +55,6 @@
 
                 this.startCurrentLevel();
             },
-//        start: function () {
-//            $("#loading").hide();
-//            $("#gameArea").show();
-//
-//            var game = YE.Director.getInstance();
-//
-//            game.runWithScene(new Scene());
-//        },
             getLevelData: function () {
                 return  levelData[this.currentLevel];
             },
@@ -126,10 +118,7 @@
                 var triggers = this.getLevelData().triggers,
                     i = 0;
 
-                //先让游戏进程运行一段时间，绘制出画面，然后再显示画面
-//                setTimeout(function () {
                 ui.showGameArea();
-//                }, 500);
 
                 YE.Director.getInstance().runWithScene(new Scene());
 
@@ -139,8 +128,6 @@
             },
             endLevel: function (success) {
                 this.exit();
-
-//                game.running = false;
 
                 if (success) {
                     YE.SoundManager.getInstance().play("win");
@@ -164,13 +151,6 @@
                     ui.showMessageBox("结束游戏", function () {
                         ui.showIndex();
                     });
-//                    ui.showMessageBox("Mission Failed.<br><br>Try again?", function () {
-//                        $('.gamelayer').hide();
-//                        singleplayer.startCurrentLevel();
-//                    }, function () {
-//                        $('.gamelayer').hide();
-//                        $('#gamestartscreen').show();
-//                    });
                 }
             },
             exit: function () {

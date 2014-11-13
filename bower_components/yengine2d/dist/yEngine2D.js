@@ -8,9 +8,9 @@
  qq: 395976266
  blog: http://www.cnblogs.com/chaogex/
  homepage: 
- repository: 
+ repository: https://github.com/yyc-git/YEngine2D
  license: MIT
- date: 2014-11-09
+ date: 2014-11-13
 */
 (function () {
     function _extend(destination, source) {
@@ -3330,13 +3330,6 @@ YE.AnimationManager = YYC.Class(YE.CollectionManager, {
 
                 this.ye___canvas = canvas;
                 this.ye___getContext();
-
-                if (!this.ye___graphics) {
-                    this.ye___graphics = YE.Graphics.create(this.getContext());
-                }
-                else {
-                    this.ye___graphics.setContext(this.getContext());
-                }
             },
             setWidth: function (width) {
                 this.ye___canvas.width = width;
@@ -3353,6 +3346,13 @@ YE.AnimationManager = YYC.Class(YE.CollectionManager, {
                 return this.ye___context;
             },
             getGraphics: function () {
+                if (!this.ye___graphics) {
+                    this.ye___graphics = YE.Graphics.create(this.getContext());
+                }
+//                else {
+//                    this.ye___graphics.setContext(this.getContext());
+//                }
+
                 return this.ye___graphics;
             },
             change: function () {
@@ -4185,15 +4185,12 @@ namespace("YE").Event = {
             ye_P_load: function (urlArr, key) {
                 var self = this;
 
-                YE.YSoundEngine.create({
-                    url: urlArr,
-                    onload: function () {
-                        YE.LoaderManager.getInstance().onResLoaded();
-                        self.ye_P_container.appendChild(key, this);
-                    },
-                    onerror: function (code) {
-                        YE.LoaderManager.getInstance().onResError(urlArr, "错误原因：code" + code);
-                    }
+                YE.SoundManager.getInstance().createSound(urlArr, function () {
+                    YE.LoaderManager.getInstance().onResLoaded();
+                    self.ye_P_container.appendChild(key, this);
+
+                }, function (code) {
+                    YE.LoaderManager.getInstance().onResError(urlArr, "错误原因：code" + code);
                 });
             }
         },
@@ -4218,6 +4215,13 @@ namespace("YE").Event = {
             ye_counter: 0
         },
         Public: {
+            createSound: function (urlArr, onload, onerror) {
+                YE.YSoundEngine.create({
+                    urlArr: urlArr,
+                    onload: onload,
+                    onerror: onerror
+                });
+            },
             play: function (soundId) {
                 var sound = YE.SoundLoader.getInstance().get(soundId),
                     audioObject = null;
@@ -5559,7 +5563,7 @@ namespace("YE").Event = {
 (function () {
     YE.YSoundEngine = YYC.Class({
         Init: function (config) {
-            this.ye_urlArr = config.url;
+            this.ye_urlArr = config.urlArr;
             this.ye_onload = config.onload;
             this.ye_onerror = config.onerror;
         },
