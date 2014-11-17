@@ -38,6 +38,8 @@ var CharacterSprite = YYC.Class(EntitySprite, {
         },
         ____makeFindPathFeasible: function (grid, destination) {
             grid[destination[1]][destination[0]] = 0;
+
+            return grid;
         },
         ____wait: function (nextPos, nextDirection) {
             this.____isMovingFlag = false;
@@ -108,12 +110,14 @@ var CharacterSprite = YYC.Class(EntitySprite, {
                 this.____reloadWhenMoving();
             }
         },
-        ____prepareToFindNewPathWithUnit: function () {
-            window.mapLayer.buildPassableGrid(true, this.getUid());
+        ____prepareForFindNewPathWithUnit: function () {
+            var onlyUnitPassableGridData = null;
+
+            onlyUnitPassableGridData = window.mapLayer.getUnitPassableGridData(this.getUid());
             this.____path = null;
             this.isCollisionMove = false;
 
-            return window.mapLayer.onlyUnitPassableGridData;
+            return onlyUnitPassableGridData;
         },
         ____isChangeDest: function (newDest, oldDest) {
             return !tool.isEqualGrid(newDest, oldDest);
@@ -236,11 +240,13 @@ var CharacterSprite = YYC.Class(EntitySprite, {
             return this.P____steer.getCollisionObjects(grid, nextGrid, units, this.getUid(), this.radius);
         },
         ____findPath: function (grid, current_floorGrid, dest_floorGrid) {
+            var pathGrid = grid;
+
             if (moveAlgorithm.isDestCanNotPass(dest_floorGrid)) {
-                this.____makeFindPathFeasible(grid, dest_floorGrid);
+                pathGrid = this.____makeFindPathFeasible(YE.Tool.extend.extendDeep(grid), dest_floorGrid);
             }
 
-            return YE.AStar.aCompute(grid, current_floorGrid, dest_floorGrid).path;
+            return YE.AStar.aCompute(pathGrid, current_floorGrid, dest_floorGrid).path;
         }
     },
     Protected: {
@@ -368,7 +374,7 @@ var CharacterSprite = YYC.Class(EntitySprite, {
 
             if (this.isCollisionMove) {
                 if (this.____isOutOfDistance()) {
-                    grid = this.____prepareToFindNewPathWithUnit();
+                    grid = this.____prepareForFindNewPathWithUnit();
                 }
                 else {
                     this.____collisionMove(destination);

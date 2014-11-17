@@ -103,15 +103,10 @@ var MapLayer = YYC.Class(YE.Layer, {
             this._mapBufferCanvas4.getContext("2d").drawImage(this._mapBufferCanvas, width, height, width, height,
                 0, 0, width, height);
         },
-        _initPassableGrid: function (isOnlyUnit) {
+        _initPassableGrid: function () {
             var levelData = LevelManager.getInstance().getLevelData();
 
-            if (isOnlyUnit) {
-                this.onlyUnitPassableGridData = YYC.Tool.extend.extendDeep(levelData.terrain);
-            }
-            else {
-                this.passableGridData = YYC.Tool.extend.extendDeep(levelData.terrain);
-            }
+            return YYC.Tool.extend.extendDeep(levelData.terrain);
         },
         _initBuildableGrid: function () {
             var levelData = LevelManager.getInstance().getLevelData();
@@ -413,7 +408,6 @@ var MapLayer = YYC.Class(YE.Layer, {
     Public: {
         dragSelect: false,
         passableGridData: [],
-        onlyUnitPassableGridData: [],
         buildableGridData: [],
         rightClickItem: null,
 
@@ -577,66 +571,72 @@ var MapLayer = YYC.Class(YE.Layer, {
 
             this.setStateChange();
         },
-        buildPassableGrid: function (isOnlyUnit, uid) {
-            var items = null;
-            var x = 0,
+        getUnitPassableGridData: function (uid) {
+            var onlyUnitPassableGridData = null,
+                items = null,
+                x = 0,
                 y = 0,
                 self = this;
 
-            if (isOnlyUnit) {
-                items = window.entityLayer.getChilds().filter(function (item) {
-                    if (!tool.isGridSprite(item) || item.isDead()) {
-                        return false;
-                    }
+            items = window.entityLayer.getChilds().filter(function (item) {
+                if (!tool.isGridSprite(item) || item.isDead()) {
+                    return false;
+                }
 
-                    return true;
-                });
+                return true;
+            });
 
-                this._initPassableGrid(isOnlyUnit);
+            onlyUnitPassableGridData = this._initPassableGrid();
 
-                items.forEach(function (item) {
-                    if (item.getUid() === uid
-                        || tool.isDestOutOfMap([Math.floor(item.gridY), Math.floor(item.gridX)])) {  //处理精灵被碰撞挤出地图的情况
-                        return;
-                    }
-                    if (tool.isUnitSprite(item)) {
-                        self.onlyUnitPassableGridData[Math.floor(item.gridY)][Math.floor(item.gridX)] = 1;
-                    }
-                    else {
-                        for (y = 0; y < item.passableGrid.length; y++) {
-                            for (x = 0; x < item.passableGrid[y].length; x++) {
-                                if (item.passableGrid[y][x] === 1) {
-                                    self.onlyUnitPassableGridData[
-                                        Math.floor(item.gridY) + y][Math.floor(item.gridX) + x] = 1;
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-            else {
-                items = window.entityLayer.getChildsByTag(["building", "terrain", "resource"]);
-                items = items.filter(function (item) {
-                    if (item.isDead()) {
-                        return false;
-                    }
-
-                    return true;
-                });
-
-                this._initPassableGrid();
-
-                items.forEach(function (item) {
+            items.forEach(function (item) {
+                if (item.getUid() === uid
+                    || tool.isDestOutOfMap([Math.floor(item.gridY), Math.floor(item.gridX)])) {  //处理精灵被碰撞挤出地图的情况
+                    return;
+                }
+                if (tool.isUnitSprite(item)) {
+                    onlyUnitPassableGridData[Math.floor(item.gridY)][Math.floor(item.gridX)] = 1;
+                }
+                else {
                     for (y = 0; y < item.passableGrid.length; y++) {
                         for (x = 0; x < item.passableGrid[y].length; x++) {
                             if (item.passableGrid[y][x] === 1) {
-                                self.passableGridData[
+                                onlyUnitPassableGridData[
                                     Math.floor(item.gridY) + y][Math.floor(item.gridX) + x] = 1;
                             }
                         }
                     }
-                });
-            }
+                }
+            });
+
+            return onlyUnitPassableGridData;
+        },
+        buildPassableGrid: function () {
+            var items = null,
+                x = 0,
+                y = 0,
+                self = this;
+
+            items = window.entityLayer.getChildsByTag(["building", "terrain", "resource"])
+                .filter(function (item) {
+                if (item.isDead()) {
+                    return false;
+                }
+
+                return true;
+            });
+
+            this.passableGridData = this._initPassableGrid();
+
+            items.forEach(function (item) {
+                for (y = 0; y < item.passableGrid.length; y++) {
+                    for (x = 0; x < item.passableGrid[y].length; x++) {
+                        if (item.passableGrid[y][x] === 1) {
+                            self.passableGridData[
+                                Math.floor(item.gridY) + y][Math.floor(item.gridX) + x] = 1;
+                        }
+                    }
+                }
+            });
         },
         buildBuildableGrid: function () {
             var items = window.entityLayer.getChilds();

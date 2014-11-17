@@ -371,7 +371,7 @@ describe("MapLayer", function () {
         });
     });
 
-    describe("buildPassableGrid", function () {
+    describe("设置可通过的地形数据", function(){
         var terrainData = null;
 
         function buildInitGrid() {
@@ -395,7 +395,7 @@ describe("MapLayer", function () {
             buildInitGrid();
         });
 
-        describe("如果参数isWithUnit为true，则设置currentMapPassableGridWithUnit数组", function () {
+        describe("getUnitPassableGridData", function () {
             function buildFakeItem(passableGrid, gridX, gridY, tag, uid, isDead) {
                 return {
                     passableGrid: passableGrid,
@@ -422,9 +422,9 @@ describe("MapLayer", function () {
                     }
                 });
 
-                layer.buildPassableGrid(true);
+                var passableGridData = layer.getUnitPassableGridData();
 
-                expect(layer.onlyUnitPassableGridData).toEqual([
+                expect(passableGridData).toEqual([
                     [0, 0, 0, 0] ,
                     [0, 0, 0, 0],
                     [0, 0, 0, 0]
@@ -440,9 +440,9 @@ describe("MapLayer", function () {
                     }
                 });
 
-                layer.buildPassableGrid(true);
+                var passableGridData = layer.getUnitPassableGridData();
 
-                expect(layer.onlyUnitPassableGridData).toEqual([
+                expect(passableGridData).toEqual([
                     [0, 0, 0, 0] ,
                     [0, 0, 0, 0],
                     [0, 0, 0, 0]
@@ -472,9 +472,9 @@ describe("MapLayer", function () {
                         }
                     });
 
-                    layer.buildPassableGrid(true, 4);
+                    var passableGridData = layer.getUnitPassableGridData(4);
 
-                    expect(layer.onlyUnitPassableGridData).toEqual([
+                    expect(passableGridData).toEqual([
                         [1, 0, 0, 0] ,
                         [1, 0, 1, 0],
                         [0, 0, 0, 1]
@@ -483,63 +483,64 @@ describe("MapLayer", function () {
             });
         });
 
-        describe("否则，则设置currentMapPassableGrid数组", function () {
-            function buildFakeItem(passableGrid, gridX, gridY, tag, isBuildState, isDead) {
-                return {
-                    passableGrid: passableGrid,
-                    gridX: gridX,
-                    gridY: gridY,
-                    hasTag: function (t) {
-                        tag = tag || "resource";
-                        return t === tag;
-                    },
-                    isBuildState: function () {
-                        return  isBuildState || false;
-                    },
-                    isDead: function () {
-                        return isDead || false;
+        describe("buildPassableGrid", function () {
+            describe("设置passableGridData数组", function () {
+                function buildFakeItem(passableGrid, gridX, gridY, tag, isBuildState, isDead) {
+                    return {
+                        passableGrid: passableGrid,
+                        gridX: gridX,
+                        gridY: gridY,
+                        hasTag: function (t) {
+                            tag = tag || "resource";
+                            return t === tag;
+                        },
+                        isBuildState: function () {
+                            return  isBuildState || false;
+                        },
+                        isDead: function () {
+                            return isDead || false;
+                        }
                     }
                 }
-            }
 
-            it("如果精灵已死亡，则精灵所在方格为可通过", function () {
-                var item = buildFakeItem([1, 1], 0, 0, "building", false, true);
-                sandbox.stub(window, "entityLayer", {
-                    getChildsByTag: function () {
-                        return [item];
-                    }
+                it("如果精灵已死亡，则精灵所在方格为可通过", function () {
+                    var item = buildFakeItem([1, 1], 0, 0, "building", false, true);
+                    sandbox.stub(window, "entityLayer", {
+                        getChildsByTag: function () {
+                            return [item];
+                        }
+                    });
+
+                    layer.buildPassableGrid();
+
+                    expect(layer.passableGridData).toEqual([
+                        [0, 0, 0, 0] ,
+                        [0, 0, 0, 0],
+                        [0, 0, 0, 0]
+                    ]);
                 });
+                it("根据精灵的passableGrid设置地形数据，0为可通过，1为不可通过", function () {
+                    var item1 = buildFakeItem([
+                            [1, 0, 1]
+                        ], 0, 1) ,
+                        item2 = buildFakeItem([
+                            [0, 0, 1]
+                        ], 1, 2);
+                    sandbox.stub(window, "entityLayer", {
+                        getChildsByTag: function () {
+                            return [item1, item2];
+                        }
+                    });
 
-                layer.buildPassableGrid();
+                    layer.buildPassableGrid();
 
-                expect(layer.passableGridData).toEqual([
-                    [0, 0, 0, 0] ,
-                    [0, 0, 0, 0],
-                    [0, 0, 0, 0]
-                ]);
-            });
-            it("根据精灵的passableGrid设置地形数据，0为可通过，1为不可通过", function () {
-                var item1 = buildFakeItem([
-                        [1, 0, 1]
-                    ], 0, 1) ,
-                    item2 = buildFakeItem([
-                        [0, 0, 1]
-                    ], 1, 2);
-                sandbox.stub(window, "entityLayer", {
-                    getChildsByTag: function () {
-                        return [item1, item2];
-                    }
+                    expect(layer.passableGridData).toEqual([
+                        [0, 0, 0, 0] ,
+                        [1, 0, 1, 0],
+                        [0, 0, 0, 1]
+                    ]);
                 });
-
-                layer.buildPassableGrid();
-
-                expect(layer.passableGridData).toEqual([
-                    [0, 0, 0, 0] ,
-                    [1, 0, 1, 0],
-                    [0, 0, 0, 1]
-                ]);
             });
         });
     });
-
 });
