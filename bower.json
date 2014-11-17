@@ -32,9 +32,9 @@
     "homepage": "",
     "repository": "https://github.com/yyc-git/AncientWar",
     "dependencies": {
-        "yoop": "~1.1.0",
+        "yoop": "*",
         "jquery": "1.7.1",
-        "yyctoolbox": "~1.0.0",
-        "yengine2d": "~0.1.0"
+        "yyctoolbox": "*",
+        "yengine2d": "*"
     }
 }

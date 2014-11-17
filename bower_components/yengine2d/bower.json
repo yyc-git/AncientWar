@@ -1,11 +1,11 @@
 {
     "name": "yEngine2D",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "main": [
         "dist/yEngine2D.js",
         "dist/yEngine2D.min.js"
     ],
-    "description": "2D web game engine",
+    "description": "2D HTML5 Game Engine",
     "ignore": [
         "bower_components",
         "src",

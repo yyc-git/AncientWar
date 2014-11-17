@@ -1,8 +1,8 @@
 /*!
  yEngine2D
- 2D web game engine
+ 2D HTML5 Game Engine
 
- version: 0.1.0
+ version: 0.1.1
  author: YYC
  email: 395976266@qq.com
  qq: 395976266
@@ -10,8 +10,8 @@
  homepage: 
  repository: https://github.com/yyc-git/YEngine2D
  license: MIT
- date: 2014-11-13
-*/
+ date: 2014-11-16
+ */
 (function () {
     function _extend(destination, source) {
         var property = "";
@@ -231,8 +231,8 @@
         },
         ye_engineFilePaths: [
             "import/yeQuery.js",
-            "import/YOOP.js",
             "import/jsExtend.js",
+            "import/YSound.js",
 
             "tool/Tool.js",
 
@@ -291,9 +291,7 @@
             "action/JumpBy.js",
             "action/Place.js",
 
-            "ui/Graphics.js" ,
-
-            "ySoundEngine/YSoundEngine.js"
+            "ui/Graphics.js"
         ],
         ye_isLoaded: false,
 
@@ -365,8 +363,8 @@
 
     /*!
      扩展String对象
-    */
-    (function(){
+     */
+    (function () {
         String.prototype.contain = function (str) {
             return this.indexOf(str) >= 0
         };
@@ -383,7 +381,7 @@
     /*!
      扩展Array对象
      */
-    (function(){
+    (function () {
         global.$break = {};
 
         Array.prototype.forEach = function (fn, context) {
@@ -559,9 +557,15 @@
 
                 try {
                     xhr.open(type, url, true);
+
+                    if (_isSoundFile(dataType)) {
+                        xhr.responseType = "arraybuffer";
+                    }
+
                     if (type === "GET" || type === "get") {
                         xhr.send(null);
-                    } else if (type === "POST" || type === "post") {
+                    }
+                    else if (type === "POST" || type === "post") {
                         xhr.setRequestHeader("content-type", "application/x-www-form-urlencoded");
                         xhr.send(data);
                     }
@@ -574,13 +578,20 @@
                                 if (success !== null) {//普通文本
                                     success(xhr.responseText);
                                 }
-                            } else if (dataType === "xml" || dataType === "XML") {
+                            }
+                            else if (dataType === "xml" || dataType === "XML") {
                                 if (success !== null) {//接收xml文档
                                     success(xhr.responseXML);
                                 }
-                            } else if (dataType === "json" || dataType === "JSON") {
+                            }
+                            else if (dataType === "json" || dataType === "JSON") {
                                 if (success !== null) {//将json字符串转换为js对象
                                     success(eval("(" + xhr.responseText + ")"));
+                                }
+                            }
+                            else if (_isSoundFile(dataType)) {
+                                if (success !== null) {//将json字符串转换为js对象
+                                    success(xhr.response);
                                 }
                             }
                         }
@@ -591,7 +602,7 @@
                 }
             }
 
-            function _createAjax() {
+            function _createAjax(error) {
                 var xhr = null;
                 try {//IE系列浏览器
                     xhr = new ActiveXObject("microsoft.xmlhttp");
@@ -608,6 +619,10 @@
 
             function _isLocalFile(status) {
                 return document.URL.contain("file://") && status === 0;
+            }
+
+            function _isSoundFile(dataType) {
+                return dataType === "arraybuffer";
             }
 
             return ajax;
@@ -644,120 +659,123 @@
 
     YE.$ = yeQuery;
 }());
-/*!
-私有成员前缀为“ye_entity_”
-为什么不将前缀设成“ye_”？
-这是因为是这样，那么继承Entity的引擎类的私有成员前缀就都要加一个下划线“_”。
-因此，将前缀设为Entity类独有，则不用担心子类的私有成员会覆盖Entity的私有成员！
-*/
-YE.Entity = YYC.AClass({
-    Init: function () {
-        this.ye_entity_addUid();
+(function () {
+    /*!
+     私有成员前缀为“ye_entity_”
+     为什么不将前缀设成“ye_”？
+     因为如果这样，继承Entity的引擎类的私有成员前缀就都要加一个下划线“_”。
+     因此，将前缀设为Entity类独有，则不用担心子类的私有成员覆盖Entity的私有成员！
+     */
+    YE.Entity = YYC.AClass({
+        Init: function () {
+            this.ye_entity_addUid();
 
-        this.ye_entity_cacheData = YE.Hash.create();
-    },
-    Private: {
-        ye_entity_uid: 0,
-        ye_entity_cacheData: null,
-        ye_entity_tag: null,
+            this.ye_entity_cacheData = YE.Hash.create();
+        },
+        Private: {
+            ye_entity_uid: 0,
+            ye_entity_cacheData: null,
+            ye_entity_tag: null,
 
-        ye_entity_addUid: function () {
-            this.ye_entity_uid = YE.Entity.count++;
-        }
-    },
-    Public: {
-        setCacheData: function (key, dataArr) {
-            this.ye_entity_cacheData.addChild(key, dataArr);
-        },
-        getCacheData: function (key) {
-            return this.ye_entity_cacheData.getValue(key);
-        },
-        getUid: function () {
-            return this.ye_entity_uid;
-        },
-        setTag: function (tag) {
-            if (YE.Tool.judge.isArray(tag)) {
-                this.ye_entity_tag = tag;
-            }
-            else {
-                this.ye_entity_tag = [tag];
+            ye_entity_addUid: function () {
+                this.ye_entity_uid = YE.Entity.count++;
             }
         },
-        addTag: function (tag) {
-            if (this.ye_entity_tag === null) {
-                this.setTag(tag);
-                return;
-            }
+        Public: {
+            setCacheData: function (key, dataArr) {
+                this.ye_entity_cacheData.addChild(key, dataArr);
+            },
+            getCacheData: function (key) {
+                return this.ye_entity_cacheData.getValue(key);
+            },
+            getUid: function () {
+                return this.ye_entity_uid;
+            },
+            setTag: function (tag) {
+                if (YE.Tool.judge.isArray(tag)) {
+                    this.ye_entity_tag = tag;
+                }
+                else {
+                    this.ye_entity_tag = [tag];
+                }
+            },
+            addTag: function (tag) {
+                if (this.ye_entity_tag === null) {
+                    this.setTag(tag);
+                    return;
+                }
 
-            this.ye_entity_tag.push(tag);
-        },
-        removeTag: function (tag) {
-            if (this.ye_entity_tag === null) {
-                return;
-            }
+                this.ye_entity_tag.push(tag);
+            },
+            removeTag: function (tag) {
+                if (this.ye_entity_tag === null) {
+                    return;
+                }
 
-            this.ye_entity_tag.removeChild(function (t) {
-                return t === tag;
-            });
-        },
-        getTag: function () {
-            return this.ye_entity_tag;
-        },
-        hasTag: function (tag) {
-            return this.ye_entity_tag &&
-                (this.ye_entity_tag === tag || this.ye_entity_tag.contain(function (t) {
+                this.ye_entity_tag.removeChild(function (t) {
                     return t === tag;
-                }));
-        },
-        containTag: function (tag) {
-            if (!this.ye_entity_tag) {
-                return;
+                });
+            },
+            getTag: function () {
+                return this.ye_entity_tag;
+            },
+            hasTag: function (tag) {
+                return this.ye_entity_tag &&
+                    (this.ye_entity_tag === tag || this.ye_entity_tag.contain(function (t) {
+                        return t === tag;
+                    }));
+            },
+            containTag: function (tag) {
+                if (!this.ye_entity_tag) {
+                    return;
+                }
+
+                return this.ye_entity_tag.contain(tag);
             }
-
-            return this.ye_entity_tag.contain(tag);
-        }
-    },
-    Static: {
-        //uid计数器
-        count: 1
-    }
-});
-YE.Node = YYC.AClass(YE.Entity, {
-    Private: {
-        ye_parent: null,
-        ye_zOrder: 0,
-
-        ye_setZOrder: function (zOrder) {
-            this.ye_zOrder = zOrder;
-        }
-    },
-    Public: {
-        getParent: function () {
-            return this.ye_parent;
         },
-        getZOrder: function () {
-            return this.ye_zOrder;
+        Static: {
+            //uid计数器
+            count: 1
+        }
+    });
+}());
+(function () {
+    YE.Node = YYC.AClass(YE.Entity, {
+        Private: {
+            ye_parent: null,
+            ye_zOrder: 0,
+
+            ye_setZOrder: function (zOrder) {
+                this.ye_zOrder = zOrder;
+            }
         },
-
-        Virtual: {
-            init: function (parent) {
-                this.ye_parent = parent;
+        Public: {
+            getParent: function () {
+                return this.ye_parent;
+            },
+            getZOrder: function () {
+                return this.ye_zOrder;
             },
 
-            //*钩子
+            Virtual: {
+                init: function (parent) {
+                    this.ye_parent = parent;
+                },
 
-            onStartLoop: function () {
-            },
-            onEndLoop: function () {
-            },
-            onEnter: function () {
-            },
-            onExit: function () {
+                //*钩子
+
+                onStartLoop: function () {
+                },
+                onEndLoop: function () {
+                },
+                onEnter: function () {
+                },
+                onExit: function () {
+                }
             }
         }
-    }
-});
-
+    });
+}());
 (function () {
     YE.CollectionManager = YYC.AClass(YE.Entity, {
         Init: function () {
@@ -847,130 +865,131 @@ YE.Node = YYC.AClass(YE.Entity, {
         }
     });
 }());
-YE.NodeContainer = YYC.AClass(YE.Node, {
-    Init: function () {
-        this.base();
+(function () {
+    YE.NodeContainer = YYC.AClass(YE.Node, {
+        Init: function () {
+            this.base();
 
-        this.ye__childs = YE.Collection.create();
-    },
-    Private: {
-        ye__isChangeZOrder: false,
-        ye__childs: null
-    },
-    Protected: {
-        Abstract: {
-            ye_P_run: function () {
-            }
-        }
-    },
-    Public: {
-        isSortAllChilds: true,
-
-        reorderChild: function (child, zOrder) {
-            this.ye__isChangeZOrder = true;
-
-            child.ye_setZOrder(zOrder);
+            this.ye__childs = YE.Collection.create();
         },
-        sortByZOrder: function () {
-            if (this.ye__isChangeZOrder) {
-                this.ye__isChangeZOrder = false;
-
-                this.sort(function (child1, child2) {
-                    return child1.getZOrder() - child2.getZOrder();
-                });
+        Private: {
+            ye__isChangeZOrder: false,
+            ye__childs: null
+        },
+        Protected: {
+            Abstract: {
+                ye_P_run: function () {
+                }
             }
         },
-        sort: function (func) {
-            this.ye__childs.sort(func);
-        },
-        getChilds: function () {
-            return this.ye__childs.getChilds();
-        },
-        getChildAt: function (index) {
-            return this.ye__childs.getChildAt(index);
-        },
-        addChilds: function (childs, zOrder, tag) {
-            var self = this;
+        Public: {
+            isSortAllChilds: true,
 
-            YE.error(!YE.Tool.judge.isArray(childs), "第一个参数必须为数组");
-
-            if (zOrder) {
+            reorderChild: function (child, zOrder) {
                 this.ye__isChangeZOrder = true;
-            }
 
-            this.ye__childs.addChilds(childs);
+                child.ye_setZOrder(zOrder);
+            },
+            sortByZOrder: function () {
+                if (this.ye__isChangeZOrder) {
+                    this.ye__isChangeZOrder = false;
 
-            childs.forEach(function (child) {
+                    this.sort(function (child1, child2) {
+                        return child1.getZOrder() - child2.getZOrder();
+                    });
+                }
+            },
+            sort: function (func) {
+                this.ye__childs.sort(func);
+            },
+            getChilds: function () {
+                return this.ye__childs.getChilds();
+            },
+            getChildAt: function (index) {
+                return this.ye__childs.getChildAt(index);
+            },
+            addChilds: function (childs, zOrder, tag) {
+                var self = this;
+
+                YE.error(!YE.Tool.judge.isArray(childs), "第一个参数必须为数组");
+
                 if (zOrder) {
+                    this.ye__isChangeZOrder = true;
+                }
+
+                this.ye__childs.addChilds(childs);
+
+                childs.forEach(function (child) {
+                    if (zOrder) {
+                        child.ye_setZOrder(zOrder);
+                    }
+                    if (tag) {
+                        child.addTag(tag);
+                    }
+                    child.init(self);
+                    child.onEnter();
+                });
+            },
+            addChild: function (child, zOrder, tag) {
+                this.ye__childs.addChild(child);
+
+                if (zOrder) {
+                    this.ye__isChangeZOrder = true;
                     child.ye_setZOrder(zOrder);
                 }
                 if (tag) {
                     child.addTag(tag);
                 }
-                child.init(self);
+                child.init(this);
                 child.onEnter();
-            });
-        },
-        addChild: function (child, zOrder, tag) {
-            this.ye__childs.addChild(child);
-
-            if (zOrder) {
-                this.ye__isChangeZOrder = true;
-                child.ye_setZOrder(zOrder);
-            }
-            if (tag) {
-                child.addTag(tag);
-            }
-            child.init(this);
-            child.onEnter();
-        },
-        hasChild: function (child) {
-            return this.ye__childs.hasChild(child);
-        },
-        getChildByTag: function (tag) {
-            return YE.Tool.collection.getChildByTag(this.ye__childs, tag);
-        },
-        getChildsByTag: function (tag) {
-            return YE.Tool.collection.getChildsByTag(this.ye__childs, tag);
-        },
-        removeChildByTag: function (tag) {
-            YE.Tool.collection.removeChildByTag(this.ye__childs, tag, function (child) {
+            },
+            hasChild: function (child) {
+                return this.ye__childs.hasChild(child);
+            },
+            getChildByTag: function (tag) {
+                return YE.Tool.collection.getChildByTag(this.ye__childs, tag);
+            },
+            getChildsByTag: function (tag) {
+                return YE.Tool.collection.getChildsByTag(this.ye__childs, tag);
+            },
+            removeChildByTag: function (tag) {
+                YE.Tool.collection.removeChildByTag(this.ye__childs, tag, function (child) {
+                    child.onExit();
+                });
+            },
+            removeChildsByTag: function (tag) {
+                YE.Tool.collection.removeChildsByTag(this.ye__childs, tag, function (child) {
+                    child.onExit();
+                });
+            },
+            removeChild: function (child) {
                 child.onExit();
-            });
-        },
-        removeChildsByTag: function (tag) {
-            YE.Tool.collection.removeChildsByTag(this.ye__childs, tag, function (child) {
-                child.onExit();
-            });
-        },
-        removeChild: function (child) {
-            child.onExit();
-            this.ye__childs.removeChild(child);
-        },
-        removeAllChilds: function () {
-            this.ye__childs.map("onExit");
+                this.ye__childs.removeChild(child);
+            },
+            removeAllChilds: function () {
+                this.ye__childs.map("onExit");
 
-            this.ye__childs.removeAllChilds();
-        },
-        iterate: function (handler, args) {
-            if (YE.Tool.judge.isFunction(arguments[0])) {
-                this.ye__childs.forEach.apply(this.ye__childs, arguments);
-            }
-            else {
-                this.ye__childs.map.apply(this.ye__childs, arguments);
-            }
-        },
-        //游戏主循环调用的方法
-        run: function () {
-            if (this.isSortAllChilds) {
-                this.sortByZOrder();
-            }
+                this.ye__childs.removeAllChilds();
+            },
+            iterate: function (handler, args) {
+                if (YE.Tool.judge.isFunction(arguments[0])) {
+                    this.ye__childs.forEach.apply(this.ye__childs, arguments);
+                }
+                else {
+                    this.ye__childs.map.apply(this.ye__childs, arguments);
+                }
+            },
+            //游戏主循环调用的方法
+            run: function () {
+                if (this.isSortAllChilds) {
+                    this.sortByZOrder();
+                }
 
-            this.ye_P_run();
+                this.ye_P_run();
+            }
         }
-    }
-});
-
+    });
+}());
 (function () {
     YE.Action = YYC.AClass(YE.Entity, {
         Init: function () {
@@ -1031,86 +1050,91 @@ YE.NodeContainer = YYC.AClass(YE.Node, {
         }
     });
 }());
-YE.ActionInstant = YYC.AClass(YE.Action, {
-    Public: {
-        isStop: function () {
-            return false;
-        },
-        start: function () {
-        },
-        stop: function () {
-        }
-    }
-});
-YE.ActionInterval = YYC.AClass(YE.Action, {
-    Init: function () {
-        this.base();
-    },
-    Private: {
-        ye__isStop: false
-    },
-    Public: {
-        start: function () {
-            this.ye__isStop = false;
-        },
-        reset: function () {
-            this.base();
-
-            this.ye__isStop = false;
-        },
-        stop: function () {
-            this.ye__isStop = true;
-        },
-        isStop: function () {
-            return this.ye__isStop;
-        }
-    }
-});
-
-YE.Control = YYC.AClass(YE.ActionInterval, {
-    Init: function () {
-        this.base();
-    },
-    Protected: {
-        Virtual: {
-            ye_P_iterate: function (method, arg) {
-                var actions = this.getInnerActions();
-
-                actions.map.apply(actions, arguments);
+(function () {
+    YE.ActionInstant = YYC.AClass(YE.Action, {
+        Public: {
+            isStop: function () {
+                return false;
+            },
+            start: function () {
+            },
+            stop: function () {
             }
         }
-    },
-    Public: {
-        init: function () {
-            this.ye_P_iterate("init");
-        },
-        onEnter: function () {
-            this.ye_P_iterate("onEnter");
-        },
-        onExit: function () {
-            this.ye_P_iterate("onExit");
-        },
-        setTarget: function (target) {
-            this.base(target);
-
-            this.ye_P_iterate("setTarget", [target]);
-        },
-        reverse: function () {
-            this.ye_P_iterate("reverse");
-
-            return this;
-        },
-        reset: function () {
+    });
+}());
+(function () {
+    YE.ActionInterval = YYC.AClass(YE.Action, {
+        Init: function () {
             this.base();
+        },
+        Private: {
+            ye__isStop: false
+        },
+        Public: {
+            start: function () {
+                this.ye__isStop = false;
+            },
+            reset: function () {
+                this.base();
 
-            this.ye_P_iterate("reset");
+                this.ye__isStop = false;
+            },
+            stop: function () {
+                this.ye__isStop = true;
+            },
+            isStop: function () {
+                return this.ye__isStop;
+            }
         }
-    },
-    Abstract: {
-        getInnerActions: function () {
+    });
+}());
+(function () {
+    YE.Control = YYC.AClass(YE.ActionInterval, {
+        Init: function () {
+            this.base();
+        },
+        Protected: {
+            Virtual: {
+                ye_P_iterate: function (method, arg) {
+                    var actions = this.getInnerActions();
+
+                    actions.map.apply(actions, arguments);
+                }
+            }
+        },
+        Public: {
+            init: function () {
+                this.ye_P_iterate("init");
+            },
+            onEnter: function () {
+                this.ye_P_iterate("onEnter");
+            },
+            onExit: function () {
+                this.ye_P_iterate("onExit");
+            },
+            setTarget: function (target) {
+                this.base(target);
+
+                this.ye_P_iterate("setTarget", [target]);
+            },
+            reverse: function () {
+                this.ye_P_iterate("reverse");
+
+                return this;
+            },
+            reset: function () {
+                this.base();
+
+                this.ye_P_iterate("reset");
+            }
+        },
+        Abstract: {
+            getInnerActions: function () {
+            }
         }
-    }
-});
+    });
+}());
 (function () {
     YE.Loader = YYC.AClass(YE.Entity, {
         Init: function () {
@@ -1123,7 +1147,7 @@ YE.Control = YYC.AClass(YE.ActionInterval, {
             ye_loadedUrl: null
         },
         Protected: {
-            ye_P_container: null   ,
+            ye_P_container: null,
 
             Abstract: {
                 ye_P_load: function () {
@@ -1283,837 +1307,711 @@ YE.Control = YYC.AClass(YE.ActionInterval, {
         }
     });
 }());
-YE.CallFunc = YYC.Class(YE.ActionInstant, {
-    Init: function (func, context, dataArr) {
-        this.base();
+(function () {
+    YE.CallFunc = YYC.Class(YE.ActionInstant, {
+        Init: function (func, context, dataArr) {
+            this.base();
 
-        this.ye___context = context || window;
-        this.ye___callFunc = func;
-        this.ye___dataArr = dataArr;
-    },
-    Private: {
-        ye___context: null,
-        ye___callFunc: null,
-        ye___dataArr: null
-    },
-    Public: {
-        reverse: function () {
-            return this;
+            this.ye___context = context || window;
+            this.ye___callFunc = func;
+            this.ye___dataArr = dataArr;
         },
-        update: function (time) {
-            if (this.ye___callFunc) {
-                this.ye___callFunc.call(this.ye___context, this.getTarget(), this.ye___dataArr);
-            }
-
-            this.finish();
+        Private: {
+            ye___context: null,
+            ye___callFunc: null,
+            ye___dataArr: null
         },
-        copy: function () {
-            return new YE.CallFunc(this.ye___context, this.ye___callFunc, YE.Tool.extend.extendDeep(this.ye___dataArr));
-        }
-    },
-    Static: {
-        create: function (func, context, args) {
-            var dataArr = Array.prototype.slice.call(arguments, 2),
-                action = new this(func, context, dataArr);
-
-            return action;
-        }
-    }
-});
-YE.DelayTime = YYC.Class(YE.ActionInterval, {
-    Init: function (delayTime) {
-        this.base();
-
-        this.___delayTime = delayTime;
-    },
-    Private: {
-        ___delayTime: -1,
-        ___elapsed: -1,
-        ___firstTick: true
-    },
-    Public: {
-        reverse: function () {
-            return this;
-        },
-        update: function (time) {
-            if (this.___firstTick) {
-                this.___firstTick = false;
-                this.___elapsed = 0;
-
-                return YE.returnForTest;
-            }
-            this.___elapsed += time;
-
-            if (this.___elapsed >= this.___delayTime) {
-                this.finish();
-            }
-        },
-        copy: function () {
-            return YE.DelayTime.create(this.___delayTime);
-        }
-    },
-    Static: {
-        create: function (delayTime) {
-            var action = new this(delayTime);
-
-            return action;
-        }
-    }
-});
-
-YE.JumpBy = YYC.Class(YE.ActionInterval, {
-    Init: function (duration, x, y, height) {
-        this.base();
-
-        this.ye___duration = duration;
-        this.ye___x = x;
-        this.ye___y = y;
-        this.ye___height = height;
-    },
-    Private: {
-        ye___elapsed: 0,
-        ye___topY: 0,
-        ye___topX: 0,
-        ye___x: 0,
-        ye___y: 0,
-        ye___destX: 0,
-        ye___destY: 0,
-        ye___posX: 0,
-        ye___posY: 0,
-        ye___directionX: null,
-        ye___directionY: null,
-
-        ye___isFinish: function () {
-            return this.ye___elapsed >= this.ye___duration;
-        },
-        ye___computeTotalDistance: function () {
-            this.ye___totalX = Math.abs(this.ye___x);
-            this.ye___totalY = this.ye___height * 2 + Math.abs(this.ye___y);
-        },
-        ye___computeDestPos: function () {
-            this.ye___destX = this.ye___posX + this.ye___x;
-            this.ye___destY = this.ye___posY + this.ye___y;
-        },
-        ye___initDirection: function () {
-            if (this.ye___height === 0 && this.ye___y > 0) {
-                this.ye___directionY = "down";
-            }
-            else {
-                this.ye___directionY = "up";
-            }
-
-            if (this.ye___x > 0) {
-                this.ye___directionX = "right";
-            }
-            else {
-                this.ye___directionX = "left";
-            }
-        },
-        ye___savePosition: function () {
-            var target = null;
-
-            target = this.getTarget();
-
-            this.ye___posX = target.getPositionX();
-            this.ye___posY = target.getPositionY();
-        },
-        ye___computeTopY: function () {
-            this.ye___topY = Math.min(this.ye___posY, this.ye___posY + this.ye___y) - this.ye___height;
-        },
-        ye___setTargetToDest: function () {
-            this.getTarget().setPosition(this.ye___destX, this.ye___destY);
-        },
-        ye___computeMoveDistance: function (time) {
-            var ratio = null,
-                moveX = null,
-                moveY = null;
-
-            ratio = time / this.ye___duration;
-            moveX = ratio * this.ye___totalX;
-            moveY = ratio * this.ye___totalY;
-
-            return [moveX, moveY];
-        },
-        ye___setPosX: function (moveX) {
-            if (this.ye___directionX === "left") {
-                this.ye___posX -= moveX;
-            }
-            else {
-                this.ye___posX += moveX;
-            }
-
-            this.getTarget().setPositionX(this.ye___posX);
-        },
-        ye___setPosY: function (moveY) {
-            if (this.ye___directionY === "up") {
-                this.ye___posY -= moveY;
-
-                if (this.ye___isJumpOverTopPoint()) {
-                    this.ye___enterDownProcess();
+        Public: {
+            reverse: function () {
+                return this;
+            },
+            update: function (time) {
+                if (this.ye___callFunc) {
+                    this.ye___callFunc.call(this.ye___context, this.getTarget(), this.ye___dataArr);
                 }
-            }
-            else if (this.ye___directionY === "down") {
-                this.ye___posY += moveY;
-            }
 
-            this.getTarget().setPositionY(this.ye___posY);
-        },
-        ye___isJumpOverTopPoint: function () {
-            return this.ye___posY <= this.ye___topY;
-        },
-        ye___enterDownProcess: function () {
-            this.ye___directionY = "down";
-            this.ye___posY = this.ye___topY + (this.ye___topY - this.ye___posY);
-        }
-    },
-    Public: {
-        initWhenCreate: function () {
-            YE.error(this.ye___height < 0, "高度必须为非负值");
-
-            this.ye___computeTotalDistance();
-            this.ye___initDirection();
-        },
-        init: function () {
-            //初始化时保存精灵跳跃前的坐标，然后在跳跃的过程中基于该坐标变换。
-            //相对于跳跃过程中基于精灵的坐标变换，可避免受到用户修改精灵坐标的影响
-            this.ye___savePosition();
-
-            this.ye___computeTopY();
-            this.ye___computeDestPos();
-        },
-        update: function (time) {
-            var target = null,
-                dis = null;
-
-            target = this.getTarget();
-
-            if (this.ye___isFinish()) {
                 this.finish();
-                this.ye___setTargetToDest();
-                return;
+            },
+            copy: function () {
+                return new YE.CallFunc(this.ye___context, this.ye___callFunc, YE.Tool.extend.extendDeep(this.ye___dataArr));
             }
-
-            dis = this.ye___computeMoveDistance(time);
-
-            this.ye___setPosX(dis[0]);
-            this.ye___setPosY(dis[1]);
-
-            this.ye___elapsed += time;
         },
-        copy: function () {
-            return YE.JumpBy.create(this.ye___duration, this.ye___x, this.ye___y, this.ye___height);
-        },
-        reverse: function () {
-            return YE.JumpBy.create(this.ye___duration, -this.ye___x, -this.ye___y, this.ye___height);
+        Static: {
+            create: function (func, context, args) {
+                var dataArr = Array.prototype.slice.call(arguments, 2),
+                    action = new this(func, context, dataArr);
+
+                return action;
+            }
         }
-    },
-    Static: {
-        create: function (duration, x, y, height) {
-            var action = new this(duration, x, y, height);
+    });
+}());
+(function () {
+    YE.DelayTime = YYC.Class(YE.ActionInterval, {
+        Init: function (delayTime) {
+            this.base();
 
-            action.initWhenCreate();
+            this.___delayTime = delayTime;
+        },
+        Private: {
+            ___delayTime: -1,
+            ___elapsed: -1,
+            ___firstTick: true
+        },
+        Public: {
+            reverse: function () {
+                return this;
+            },
+            update: function (time) {
+                if (this.___firstTick) {
+                    this.___firstTick = false;
+                    this.___elapsed = 0;
 
-            return action;
+                    return YE.returnForTest;
+                }
+                this.___elapsed += time;
+
+                if (this.___elapsed >= this.___delayTime) {
+                    this.finish();
+                }
+            },
+            copy: function () {
+                return YE.DelayTime.create(this.___delayTime);
+            }
+        },
+        Static: {
+            create: function (delayTime) {
+                var action = new this(delayTime);
+
+                return action;
+            }
         }
-    }
-});
-YE.MoveBy = YYC.Class(YE.ActionInterval, {
-    Init: function (duration, x, y) {
-        this.base();
+    });
+}());
+(function () {
+    YE.JumpBy = YYC.Class(YE.ActionInterval, {
+        Init: function (duration, x, y, height) {
+            this.base();
 
-        this.ye___duration = duration;
-        this.ye___x = x;
-        this.ye___y = y;
-    },
-    Private: {
-        ye___elapsed: 0,
-        ye___duration: null,
-        ye___x: null,
-        ye___y: null,
-        ye___destX: null,
-        ye___destY: null,
-
-        ye___computeDestPos: function () {
-            var target = null;
-
-            target = this.getTarget();
-
-            this.ye___destX = target.getPositionX() + this.ye___x;
-            this.ye___destY = target.getPositionY() + this.ye___y;
+            this.ye___duration = duration;
+            this.ye___x = x;
+            this.ye___y = y;
+            this.ye___height = height;
         },
-        ye___computeMoveDistance: function (time) {
-            var ratio = null,
-                moveX = null,
-                moveY = null;
+        Private: {
+            ye___elapsed: 0,
+            ye___topY: 0,
+            ye___topX: 0,
+            ye___x: 0,
+            ye___y: 0,
+            ye___destX: 0,
+            ye___destY: 0,
+            ye___posX: 0,
+            ye___posY: 0,
+            ye___directionX: null,
+            ye___directionY: null,
 
-            ratio = time / this.ye___duration;
-            moveX = ratio * this.ye___x;
-            moveY = ratio * this.ye___y;
+            ye___isFinish: function () {
+                return this.ye___elapsed >= this.ye___duration;
+            },
+            ye___computeTotalDistance: function () {
+                this.ye___totalX = Math.abs(this.ye___x);
+                this.ye___totalY = this.ye___height * 2 + Math.abs(this.ye___y);
+            },
+            ye___computeDestPos: function () {
+                this.ye___destX = this.ye___posX + this.ye___x;
+                this.ye___destY = this.ye___posY + this.ye___y;
+            },
+            ye___initDirection: function () {
+                if (this.ye___height === 0 && this.ye___y > 0) {
+                    this.ye___directionY = "down";
+                }
+                else {
+                    this.ye___directionY = "up";
+                }
 
-            return [moveX, moveY];
+                if (this.ye___x > 0) {
+                    this.ye___directionX = "right";
+                }
+                else {
+                    this.ye___directionX = "left";
+                }
+            },
+            ye___savePosition: function () {
+                var target = null;
+
+                target = this.getTarget();
+
+                this.ye___posX = target.getPositionX();
+                this.ye___posY = target.getPositionY();
+            },
+            ye___computeTopY: function () {
+                this.ye___topY = Math.min(this.ye___posY, this.ye___posY + this.ye___y) - this.ye___height;
+            },
+            ye___setTargetToDest: function () {
+                this.getTarget().setPosition(this.ye___destX, this.ye___destY);
+            },
+            ye___computeMoveDistance: function (time) {
+                var ratio = null,
+                    moveX = null,
+                    moveY = null;
+
+                ratio = time / this.ye___duration;
+                moveX = ratio * this.ye___totalX;
+                moveY = ratio * this.ye___totalY;
+
+                return [moveX, moveY];
+            },
+            ye___setPosX: function (moveX) {
+                if (this.ye___directionX === "left") {
+                    this.ye___posX -= moveX;
+                }
+                else {
+                    this.ye___posX += moveX;
+                }
+
+                this.getTarget().setPositionX(this.ye___posX);
+            },
+            ye___setPosY: function (moveY) {
+                if (this.ye___directionY === "up") {
+                    this.ye___posY -= moveY;
+
+                    if (this.ye___isJumpOverTopPoint()) {
+                        this.ye___enterDownProcess();
+                    }
+                }
+                else if (this.ye___directionY === "down") {
+                    this.ye___posY += moveY;
+                }
+
+                this.getTarget().setPositionY(this.ye___posY);
+            },
+            ye___isJumpOverTopPoint: function () {
+                return this.ye___posY <= this.ye___topY;
+            },
+            ye___enterDownProcess: function () {
+                this.ye___directionY = "down";
+                this.ye___posY = this.ye___topY + (this.ye___topY - this.ye___posY);
+            }
         },
-        ye___isFinish: function () {
-            return this.ye___elapsed >= this.ye___duration;
+        Public: {
+            initWhenCreate: function () {
+                YE.error(this.ye___height < 0, "高度必须为非负值");
+
+                this.ye___computeTotalDistance();
+                this.ye___initDirection();
+            },
+            init: function () {
+                //初始化时保存精灵跳跃前的坐标，然后在跳跃的过程中基于该坐标变换。
+                //相对于跳跃过程中基于精灵的坐标变换，可避免受到用户修改精灵坐标的影响
+                this.ye___savePosition();
+
+                this.ye___computeTopY();
+                this.ye___computeDestPos();
+            },
+            update: function (time) {
+                var target = null,
+                    dis = null;
+
+                target = this.getTarget();
+
+                if (this.ye___isFinish()) {
+                    this.finish();
+                    this.ye___setTargetToDest();
+                    return;
+                }
+
+                dis = this.ye___computeMoveDistance(time);
+
+                this.ye___setPosX(dis[0]);
+                this.ye___setPosY(dis[1]);
+
+                this.ye___elapsed += time;
+            },
+            copy: function () {
+                return YE.JumpBy.create(this.ye___duration, this.ye___x, this.ye___y, this.ye___height);
+            },
+            reverse: function () {
+                return YE.JumpBy.create(this.ye___duration, -this.ye___x, -this.ye___y, this.ye___height);
+            }
         },
-        ye___setTargetToDest: function () {
-            this.getTarget().setPosition(this.ye___destX, this.ye___destY);
+        Static: {
+            create: function (duration, x, y, height) {
+                var action = new this(duration, x, y, height);
+
+                action.initWhenCreate();
+
+                return action;
+            }
         }
-    },
-    Public: {
-        init: function () {
-            this.ye___computeDestPos();
+    });
+}());
+(function () {
+    YE.MoveBy = YYC.Class(YE.ActionInterval, {
+        Init: function (duration, x, y) {
+            this.base();
+
+            this.ye___duration = duration;
+            this.ye___x = x;
+            this.ye___y = y;
         },
-        update: function (time) {
-            var target = null,
-                dis = null;
+        Private: {
+            ye___elapsed: 0,
+            ye___duration: null,
+            ye___x: null,
+            ye___y: null,
+            ye___destX: null,
+            ye___destY: null,
 
-            target = this.getTarget();
+            ye___computeDestPos: function () {
+                var target = null;
 
-            if (this.ye___isFinish()) {
+                target = this.getTarget();
+
+                this.ye___destX = target.getPositionX() + this.ye___x;
+                this.ye___destY = target.getPositionY() + this.ye___y;
+            },
+            ye___computeMoveDistance: function (time) {
+                var ratio = null,
+                    moveX = null,
+                    moveY = null;
+
+                ratio = time / this.ye___duration;
+                moveX = ratio * this.ye___x;
+                moveY = ratio * this.ye___y;
+
+                return [moveX, moveY];
+            },
+            ye___isFinish: function () {
+                return this.ye___elapsed >= this.ye___duration;
+            },
+            ye___setTargetToDest: function () {
+                this.getTarget().setPosition(this.ye___destX, this.ye___destY);
+            }
+        },
+        Public: {
+            init: function () {
+                this.ye___computeDestPos();
+            },
+            update: function (time) {
+                var target = null,
+                    dis = null;
+
+                target = this.getTarget();
+
+                if (this.ye___isFinish()) {
+                    this.finish();
+                    this.ye___setTargetToDest();
+                    return;
+                }
+
+                dis = this.ye___computeMoveDistance(time);
+
+                target.setPositionX(target.getPositionX() + dis[0]);
+                target.setPositionY(target.getPositionY() + dis[1]);
+
+                this.ye___elapsed += time;
+            },
+            copy: function () {
+                return YE.MoveBy.create(this.ye___duration, this.ye___x, this.ye___y);
+            },
+            reverse: function () {
+                return YE.MoveBy.create(this.ye___duration, -this.ye___x, -this.ye___y);
+            }
+        },
+        Static: {
+            create: function (duration, x, y) {
+                var action = new this(duration, x, y);
+
+                return action;
+            }
+        }
+    });
+}());
+(function () {
+    YE.Place = YYC.Class(YE.ActionInstant, {
+        Init: function (x, y) {
+            this.base();
+
+            this.ye___posX = x;
+            this.ye___posY = y;
+        },
+        Private: {
+            ye___posX: null,
+            ye___posY: null
+        },
+        Public: {
+            update: function (time) {
+                var target = null;
+
+                target = this.getTarget();
+
+                target.setPositionX(this.ye___posX);
+                target.setPositionY(this.ye___posY);
+
                 this.finish();
-                this.ye___setTargetToDest();
-                return;
+            },
+            copy: function () {
+                return YE.Place.create(this.ye___posX, this.ye___posY);
+            },
+            reverse: function () {
+                this.ye___posX = -this.ye___posX;
+                this.ye___posY = -this.ye___posY;
+
+                return this;
             }
-
-            dis = this.ye___computeMoveDistance(time);
-
-            target.setPositionX(target.getPositionX() + dis[0]);
-            target.setPositionY(target.getPositionY() + dis[1]);
-
-            this.ye___elapsed += time;
         },
-        copy: function () {
-            return YE.MoveBy.create(this.ye___duration, this.ye___x, this.ye___y);
-        },
-        reverse: function () {
-            return YE.MoveBy.create(this.ye___duration, -this.ye___x, -this.ye___y);
-        }
-    },
-    Static: {
-        create: function (duration, x, y) {
-            var action = new this(duration, x, y);
+        Static: {
+            create: function (x, y) {
+                var action = new this(x, y);
 
-            return action;
-        }
-    }
-});
-YE.Place = YYC.Class(YE.ActionInstant, {
-    Init: function (x, y) {
-        this.base();
-
-        this.ye___posX = x;
-        this.ye___posY = y;
-    },
-    Private: {
-        ye___posX: null,
-        ye___posY: null
-    },
-    Public: {
-        update: function (time) {
-            var target = null;
-
-            target = this.getTarget();
-
-            target.setPositionX(this.ye___posX);
-            target.setPositionY(this.ye___posY);
-
-            this.finish();
-        },
-        copy: function () {
-            return YE.Place.create(this.ye___posX, this.ye___posY);
-        },
-        reverse: function () {
-            this.ye___posX = -this.ye___posX;
-            this.ye___posY = -this.ye___posY;
-
-            return this;
-        }
-    },
-    Static: {
-        create: function (x, y) {
-            var action = new this(x, y);
-
-            return action;
-        }
-    }
-});
-YE.Repeat = YYC.Class(YE.Control, {
-    Init: function (action, times) {
-        this.base();
-
-        this.ye____innerAction = action;
-        this.ye____times = times;
-    },
-    Private: {
-        ye____innerAction: null,
-        ye____originTimes: 0,
-        ye____times: 0
-    },
-    Public: {
-        initWhenCreate: function () {
-            this.ye____originTimes = this.ye____times;
-        },
-        update: function (time) {
-            if (this.ye____times === 0) {
-                this.finish();
-
-                return;
+                return action;
             }
-            this.ye____innerAction.update(time);
+        }
+    });
+}());
 
-            if (this.ye____innerAction.isFinish()) {
-                this.ye____times -= 1;
+(function () {
+    YE.Repeat = YYC.Class(YE.Control, {
+        Init: function (action, times) {
+            this.base();
 
-                if (this.ye____times !== 0) {
+            this.ye____innerAction = action;
+            this.ye____times = times;
+        },
+        Private: {
+            ye____innerAction: null,
+            ye____originTimes: 0,
+            ye____times: 0
+        },
+        Public: {
+            initWhenCreate: function () {
+                this.ye____originTimes = this.ye____times;
+            },
+            update: function (time) {
+                if (this.ye____times === 0) {
+                    this.finish();
+
+                    return;
+                }
+                this.ye____innerAction.update(time);
+
+                if (this.ye____innerAction.isFinish()) {
+                    this.ye____times -= 1;
+
+                    if (this.ye____times !== 0) {
+                        this.ye____innerAction.reset();
+                    }
+                }
+            },
+            copy: function () {
+                return YE.Repeat.create(this.ye____innerAction.copy(), this.ye____times);
+            },
+            reset: function () {
+                this.base();
+
+                this.ye____times = this.ye____originTimes;
+            },
+            start: function () {
+                this.base();
+
+                this.ye____innerAction.start();
+            },
+            stop: function () {
+                this.base();
+
+                this.ye____innerAction.stop();
+            },
+            getInnerActions: function () {
+                return [this.ye____innerAction];
+            }
+        },
+        Static: {
+            create: function (action, times) {
+                var repeat = new this(action, times);
+
+                repeat.initWhenCreate();
+
+                return repeat;
+            }
+        }
+    });
+}());
+(function () {
+    YE.RepeatCondition = YYC.Class(YE.Control, {
+        Init: function (action, context, conditionFunc) {
+            this.base();
+
+            this.ye____innerAction = action;
+            this.ye____context = context || window;
+            this.ye____conditionFunc = conditionFunc;
+        },
+        Private: {
+            ye____innerAction: null,
+            ye____context: null,
+            ye____conditionFunc: null
+        },
+        Public: {
+            initWhenCreate: function () {
+                YE.error(!this.ye____conditionFunc, "必须传入重复条件");
+            },
+            update: function (time) {
+                if (!!this.ye____conditionFunc.call(this.ye____context) === false || this.ye____innerAction.isFinish()) {
+                    this.finish();
+                    return;
+                }
+
+                this.ye____innerAction.update(time);
+            },
+            copy: function () {
+                return YE.RepeatCondition.create(this.ye____innerAction.copy(), this.ye____context, this.ye____conditionFunc);
+            },
+            start: function () {
+                this.base();
+
+                this.ye____innerAction.start();
+            },
+            stop: function () {
+                this.base();
+
+                this.ye____innerAction.stop();
+            },
+            getInnerActions: function () {
+                return [this.ye____innerAction];
+            }
+        },
+        Static: {
+            create: function (action, context, conditionFunc) {
+                var repeat = new this(action, context, conditionFunc);
+
+                repeat.initWhenCreate();
+
+                return repeat;
+            }
+        }
+    });
+}());
+(function () {
+    YE.RepeatForever = YYC.Class(YE.Control, {
+        Init: function (action) {
+            this.base();
+
+            this.ye____innerAction = action;
+        },
+        Private: {
+            ye____innerAction: null
+        },
+        Public: {
+            update: function (time) {
+                this.ye____innerAction.update(time);
+
+                if (this.ye____innerAction.isFinish()) {
                     this.ye____innerAction.reset();
                 }
+            },
+            isFinish: function () {
+                return false;
+            },
+            copy: function () {
+                return YE.RepeatForever.create(this.ye____innerAction.copy());
+            },
+            start: function () {
+                this.base();
+
+                this.ye____innerAction.start();
+            },
+            stop: function () {
+                this.base();
+
+                this.ye____innerAction.stop();
+            },
+            getInnerActions: function () {
+                return [this.ye____innerAction];
             }
         },
-        copy: function () {
-            return YE.Repeat.create(this.ye____innerAction.copy(), this.ye____times);
-        },
-        reset: function () {
-            this.base();
+        Static: {
+            create: function (action) {
+                var repeat = new this(action);
 
-            this.ye____times = this.ye____originTimes;
-        },
-        start: function () {
-            this.base();
-
-            this.ye____innerAction.start();
-        },
-        stop: function () {
-            this.base();
-
-            this.ye____innerAction.stop();
-        },
-        getInnerActions: function () {
-            return [this.ye____innerAction];
-        }
-    },
-    Static: {
-        create: function (action, times) {
-            var repeat = new this(action, times);
-
-            repeat.initWhenCreate();
-
-            return repeat;
-        }
-    }
-});
-YE.RepeatCondition = YYC.Class(YE.Control, {
-    Init: function (action, context, conditionFunc) {
-        this.base();
-
-        this.ye____innerAction = action;
-        this.ye____context = context || window;
-        this.ye____conditionFunc = conditionFunc;
-    },
-    Private: {
-        ye____innerAction: null,
-        ye____context: null,
-        ye____conditionFunc: null
-    },
-    Public: {
-        initWhenCreate: function () {
-            YE.error(!this.ye____conditionFunc, "必须传入重复条件");
-        },
-        update: function (time) {
-            if (!!this.ye____conditionFunc.call(this.ye____context) === false || this.ye____innerAction.isFinish()) {
-                this.finish();
-                return;
+                return repeat;
             }
-
-            this.ye____innerAction.update(time);
-        },
-        copy: function () {
-            return YE.RepeatCondition.create(this.ye____innerAction.copy(), this.ye____context, this.ye____conditionFunc);
-        },
-        start: function () {
-            this.base();
-
-            this.ye____innerAction.start();
-        },
-        stop: function () {
-            this.base();
-
-            this.ye____innerAction.stop();
-        },
-        getInnerActions: function () {
-            return [this.ye____innerAction];
         }
-    },
-    Static: {
-        create: function (action, context, conditionFunc) {
-            var repeat = new this(action, context, conditionFunc);
-
-            repeat.initWhenCreate();
-
-            return repeat;
-        }
-    }
-});
-YE.RepeatForever = YYC.Class(YE.Control, {
-    Init: function (action) {
-        this.base();
-
-        this.ye____innerAction = action;
-    },
-    Private: {
-        ye____innerAction: null
-    },
-    Public: {
-        update: function (time) {
-            this.ye____innerAction.update(time);
-
-            if (this.ye____innerAction.isFinish()) {
-                this.ye____innerAction.reset();
-            }
-        },
-        isFinish: function () {
-            return false;
-        },
-        copy: function () {
-            return YE.RepeatForever.create(this.ye____innerAction.copy());
-        },
-        start: function () {
+    });
+}());
+(function () {
+    YE.Sequence = YYC.Class(YE.Control, {
+        Init: function () {
             this.base();
-
-            this.ye____innerAction.start();
         },
-        stop: function () {
-            this.base();
-
-            this.ye____innerAction.stop();
+        Private: {
+            ye____actions: null,
+            ye____currentAction: null,
+            ye____actionIndex: -1
         },
-        getInnerActions: function () {
-            return [this.ye____innerAction];
-        }
-    },
-    Static: {
-        create: function (action) {
-            var repeat = new this(action);
+        Public: {
+            initWhenCreate: function (actionArr) {
+                this.ye____actions = YE.Collection.create();
 
-            return repeat;
-        }
-    }
-});
-
-YE.Sequence = YYC.Class(YE.Control, {
-    Init: function () {
-        this.base();
-    },
-    Private: {
-        ye____actions: null,
-        ye____currentAction: null,
-        ye____actionIndex: -1
-    },
-    Public: {
-        initWhenCreate: function (actionArr) {
-            this.ye____actions = YE.Collection.create();
-
-            this.ye____actions.addChilds(actionArr);
-            this.ye____currentAction = this.ye____actions.getChildAt(0);
-            this.ye____actionIndex = 0;
-        },
-        update: function (time) {
-            if (this.ye____actionIndex === this.ye____actions.getCount()) {
-                this.finish();
-                return;
-            }
-
-            this.ye____currentAction = this.ye____actions.getChildAt(this.ye____actionIndex);
-
-            if (!this.ye____currentAction.isFinish()) {
-                this.ye____currentAction.update(time);
-
-                return YE.returnForTest;
-            }
-
-            this.ye____actionIndex += 1;
-
-            this.update(time);
-        },
-        copy: function () {
-            var actionArr = [];
-
-            this.ye____actions.forEach(function (action) {
-                actionArr.push(action.copy());
-            });
-
-            return YE.Sequence.create.apply(YE.Sequence, actionArr);
-        },
-        reverse: function () {
-            this.ye____actions.reverse();
-
-            this.base();
-
-            return this;
-        },
-        reset: function () {
-            this.base();
-
-            this.ye____actionIndex = 0;
-            this.ye____actions.map("reset");
-        },
-        start: function () {
-            this.base();
-
-            this.ye____currentAction.start();
-        },
-        stop: function () {
-            this.base();
-
-            this.ye____currentAction.stop();
-        },
-        getInnerActions: function () {
-            return this.ye____actions;
-        }
-    },
-    Static: {
-        create: function (actions) {
-            var actionArr = null,
-                sequence = null;
-
-            YE.assert(arguments.length >= 2, "应该有2个及以上动作");
-
-            actionArr = Array.prototype.slice.call(arguments, 0);
-
-            sequence = new this();
-            sequence.initWhenCreate(actionArr);
-
-            return sequence;
-        }
-    }
-});
-
-//
-///** Runs actions sequentially, one after another
-// * @class
-// * @extends cc.ActionInterval
-// */
-//cc.Sequence = cc.ActionInterval.extend(/** @lends cc.Sequence# */{
-//    ye_actions: null,
-//    ye_split: null,
-//    ye_last: 0,
-//
-//    /**
-//     * Constructor
-//     */
-//    ctor: function () {
-//        this.ye_actions = [];
-//    },
-//
-//    /** initializes the action <br/>
-//     * @param {cc.FiniteTimeAction} actionOne
-//     * @param {cc.FiniteTimeAction} actionTwo
-//     * @return {Boolean}
-//     */
-//    initOneTwo: function (actionOne, actionTwo) {
-//        cc.Assert(actionOne != null, "Sequence.initOneTwo");
-//        cc.Assert(actionTwo != null, "Sequence.initOneTwo");
-//
-//        var one = actionOne.getDuration();
-//        var two = actionTwo.getDuration();
-//        if (isNaN(one) || isNaN(two)) {
-//            console.log(actionOne);
-//            console.log(actionTwo);
-//        }
-//        var d = actionOne.getDuration() + actionTwo.getDuration();
-//        this.initWithDuration(d);
-//
-//        this.ye_actions[0] = actionOne;
-//        this.ye_actions[1] = actionTwo;
-//
-//        return true;
-//    },
-//
-//    /**
-//     * @param {cc.Node} target
-//     */
-//    startWithTarget: function (target) {
-//        cc.ActionInterval.prototype.startWithTarget.call(this, target);
-//        //this.ye_super(target);
-//        this.ye_split = this.ye_actions[0].getDuration() / this.ye_duration;
-//        this.ye_last = -1;
-//    },
-//
-//    /**
-//     * stop the action
-//     */
-//    stop: function () {
-//        // Issue #1305
-//        if (this.ye_last != -1) {
-//            this.ye_actions[this.ye_last].stop();
-//        }
-//        cc.Action.prototype.stop.call(this);
-//    },
-//
-//    /**
-//     * @param {Number} time  time in seconds
-//     */
-//    update: function (time) {
-//        var new_t, found = 0;
-//        if (time < this.ye_split) {
-//            // action[0]
-//            //found = 0;
-//            new_t = (this.ye_split) ? time / this.ye_split : 1;
-//        } else {
-//            // action[1]
-//            found = 1;
-//            new_t = (this.ye_split == 1) ? 1 : (time - this.ye_split) / (1 - this.ye_split);
-//
-//            if (this.ye_last == -1) {
-//                // action[0] was skipped, execute it.
-//                this.ye_actions[0].startWithTarget(this.ye_target);
-//                this.ye_actions[0].update(1);
-//                this.ye_actions[0].stop();
-//            }
-//            if (!this.ye_last) {
-//                // switching to action 1. stop action 0.
-//                this.ye_actions[0].update(1);
-//                this.ye_actions[0].stop();
-//            }
-//        }
-//
-//        if (this.ye_last != found) {
-//            this.ye_actions[found].startWithTarget(this.ye_target);
-//        }
-//        this.ye_actions[found].update(new_t);
-//        this.ye_last = found;
-//    },
-//
-//    /**
-//     * @return {cc.ActionInterval}
-//     */
-//    reverse: function () {
-//        return cc.Sequence.ye_actionOneTwo(this.ye_actions[1].reverse(), this.ye_actions[0].reverse());
-//    },
-//
-//    /**
-//     * to copy object with deep copy.
-//     * @return {object}
-//     */
-//    copy: function () {
-//        return cc.Sequence.ye_actionOneTwo(this.ye_actions[0].copy(), this.ye_actions[1].copy());
-//    }
-//});
-///** helper constructor to create an array of sequenceable actions
-// * @param {Array|cc.FiniteTimeAction} tempArray
-// * @return {cc.FiniteTimeAction}
-// * @example
-// * // example
-// * // create sequence with actions
-// * var seq = cc.Sequence.create(act1, act2);
-// *
-// * // create sequence with array
-// * var seq = cc.Sequence.create(actArray);
-// */
-//cc.Sequence.create = function (/*Multiple Arguments*/tempArray) {
-//    var paraArray = (tempArray instanceof Array) ? tempArray : arguments;
-//    var prev = paraArray[0];
-//    for (var i = 1; i < paraArray.length; i++) {
-//        if (paraArray[i]) {
-//            prev = cc.Sequence.ye_actionOneTwo(prev, paraArray[i]);
-//        }
-//    }
-//    return prev;
-//};
-//
-///** creates the action
-// * @param {cc.FiniteTimeAction} actionOne
-// * @param {cc.FiniteTimeAction} actionTwo
-// * @return {cc.Sequence}
-// * @private
-// */
-//cc.Sequence.ye_actionOneTwo = function (actionOne, actionTwo) {
-//    var sequence = new cc.Sequence();
-//    sequence.initOneTwo(actionOne, actionTwo);
-//    return sequence;
-//};
-YE.Spawn = YYC.Class(YE.Control, {
-    Init: function (actionArr) {
-        this.base();
-
-        this.ye____actions = actionArr;
-    },
-    Private: {
-        ye____actions: null,
-
-        ye____isFinish: function () {
-            var isFinish = true;
-
-            this.ye____actions.forEach(function (action, i) {
-                if (!action.isFinish()) {
-                    isFinish = false;
-                    return $break;
+                this.ye____actions.addChilds(actionArr);
+                this.ye____currentAction = this.ye____actions.getChildAt(0);
+                this.ye____actionIndex = 0;
+            },
+            update: function (time) {
+                if (this.ye____actionIndex === this.ye____actions.getCount()) {
+                    this.finish();
+                    return;
                 }
-            });
 
-            return isFinish;
-        },
-        ye____iterate: function (method, arg) {
-            this.ye____actions.forEach(function (action, i) {
-                if (!action.isFinish()) {
-                    action[method].apply(action, arg);
+                this.ye____currentAction = this.ye____actions.getChildAt(this.ye____actionIndex);
+
+                if (!this.ye____currentAction.isFinish()) {
+                    this.ye____currentAction.update(time);
+
+                    return YE.returnForTest;
                 }
-            });
-        }
-    },
-    Public: {
-        update: function (time) {
-            if (this.ye____isFinish()) {
-                this.finish();
+
+                this.ye____actionIndex += 1;
+
+                this.update(time);
+            },
+            copy: function () {
+                var actionArr = [];
+
+                this.ye____actions.forEach(function (action) {
+                    actionArr.push(action.copy());
+                });
+
+                return YE.Sequence.create.apply(YE.Sequence, actionArr);
+            },
+            reverse: function () {
+                this.ye____actions.reverse();
+
+                this.base();
+
+                return this;
+            },
+            reset: function () {
+                this.base();
+
+                this.ye____actionIndex = 0;
+                this.ye____actions.map("reset");
+            },
+            start: function () {
+                this.base();
+
+                this.ye____currentAction.start();
+            },
+            stop: function () {
+                this.base();
+
+                this.ye____currentAction.stop();
+            },
+            getInnerActions: function () {
+                return this.ye____actions;
             }
-
-            this.ye____iterate("update", [time]);
         },
-        start: function () {
-            this.base();
+        Static: {
+            create: function (actions) {
+                var actionArr = null,
+                    sequence = null;
 
-            this.ye_P_iterate("start");
-        },
-        copy: function () {
-            var actions = [];
+                YE.assert(arguments.length >= 2, "应该有2个及以上动作");
 
-            this.ye____actions.forEach(function (action) {
-                actions.push(action.copy());
-            });
-            return YE.Spawn.create.apply(YE.Spawn, actions);
-        },
-        reverse: function () {
-            this.ye____actions.reverse();
+                actionArr = Array.prototype.slice.call(arguments, 0);
 
-            this.base();
+                sequence = new this();
+                sequence.initWhenCreate(actionArr);
 
-            return this;
-        },
-        stop: function () {
-            this.base();
-
-            this.ye_P_iterate("stop");
-        },
-        reset: function () {
-            this.base();
-
-            this.ye_P_iterate("reset");
-        },
-        getInnerActions: function () {
-            return this.ye____actions;
+                return sequence;
+            }
         }
-    },
-    Static: {
-        create: function () {
-            var spawn = null;
+    });
+}());
+(function () {
+    YE.Spawn = YYC.Class(YE.Control, {
+        Init: function (actionArr) {
+            this.base();
 
-            YE.assert(arguments.length >= 2, "应该有2个及以上动作");
+            this.ye____actions = actionArr;
+        },
+        Private: {
+            ye____actions: null,
 
-            spawn = new this(Array.prototype.slice.call(arguments, 0));
+            ye____isFinish: function () {
+                var isFinish = true;
 
-            return spawn;
+                this.ye____actions.forEach(function (action, i) {
+                    if (!action.isFinish()) {
+                        isFinish = false;
+                        return $break;
+                    }
+                });
+
+                return isFinish;
+            },
+            ye____iterate: function (method, arg) {
+                this.ye____actions.forEach(function (action, i) {
+                    if (!action.isFinish()) {
+                        action[method].apply(action, arg);
+                    }
+                });
+            }
+        },
+        Public: {
+            update: function (time) {
+                if (this.ye____isFinish()) {
+                    this.finish();
+                }
+
+                this.ye____iterate("update", [time]);
+            },
+            start: function () {
+                this.base();
+
+                this.ye_P_iterate("start");
+            },
+            copy: function () {
+                var actions = [];
+
+                this.ye____actions.forEach(function (action) {
+                    actions.push(action.copy());
+                });
+                return YE.Spawn.create.apply(YE.Spawn, actions);
+            },
+            reverse: function () {
+                this.ye____actions.reverse();
+
+                this.base();
+
+                return this;
+            },
+            stop: function () {
+                this.base();
+
+                this.ye_P_iterate("stop");
+            },
+            reset: function () {
+                this.base();
+
+                this.ye_P_iterate("reset");
+            },
+            getInnerActions: function () {
+                return this.ye____actions;
+            }
+        },
+        Static: {
+            create: function () {
+                var spawn = null;
+
+                YE.assert(arguments.length >= 2, "应该有2个及以上动作");
+
+                spawn = new this(Array.prototype.slice.call(arguments, 0));
+
+                return spawn;
+            }
         }
-    }
-});
+    });
+}());
 (function () {
     var pass = 0,
         stop = 1,
@@ -2559,33 +2457,34 @@ YE.Spawn = YYC.Class(YE.Control, {
     };
 }());
 
-YE.collision = (function () {
-    //获得精灵的碰撞区域,
-    function _getCollideRect(obj) {
-        return {
-            x1: obj.origin.x,
-            y1: obj.origin.y,
-            x2: obj.origin.x + obj.size.width,
-            y2: obj.origin.y + obj.size.height
-        }
-    }
-
-    return {
-        /**
-         *矩形间的碰撞检测
-         **/
-        col_Between_Rects: function (rect1, rect2) {
-            var rect1 = _getCollideRect(rect1);
-            var rect2 = _getCollideRect(rect2);
-
-            //如果碰撞，则返回true
-            if (rect1 && rect2 &&
-                !(rect1.x1 >= rect2.x2 || rect1.y1 >= rect2.y2 || rect1.x2 <= rect2.x1 || rect1.y2 <= rect2.y1)) {
-                return true;
+(function () {
+    YE.collision = (function () {
+        //获得精灵的碰撞区域,
+        function _getCollideRect(obj) {
+            return {
+                x1: obj.origin.x,
+                y1: obj.origin.y,
+                x2: obj.origin.x + obj.size.width,
+                y2: obj.origin.y + obj.size.height
             }
-            return false;
         }
-    };
+
+        return {
+            /**
+             *矩形间的碰撞检测
+             **/
+            col_Between_Rects: function (rect1, rect2) {
+                var rect1 = _getCollideRect(rect1);
+                var rect2 = _getCollideRect(rect2);
+
+                //如果碰撞，则返回true
+                if (rect1 && rect2 && !(rect1.x1 >= rect2.x2 || rect1.y1 >= rect2.y2 || rect1.x2 <= rect2.x1 || rect1.y2 <= rect2.y1)) {
+                    return true;
+                }
+                return false;
+            }
+        };
+    }());
 }());
 
 
@@ -2806,72 +2705,74 @@ YE.collision = (function () {
         }
     });
 }());
-YE.AnimationFrameManager = YYC.Class(YE.Entity, {
-    Init: function () {
-        this.ye_animationFrame = YE.AnimationFrame.create();
-    },
-    Private: {
-        ye_animationFrame: null
-    },
-    Public: {
-        initAndReturnAnim: function (animName, tag) {
-            var anim = null;
+(function () {
+    YE.AnimationFrameManager = YYC.Class(YE.Entity, {
+        Init: function () {
+            this.ye_animationFrame = YE.AnimationFrame.create();
+        },
+        Private: {
+            ye_animationFrame: null
+        },
+        Public: {
+            initAndReturnAnim: function (animName, tag) {
+                var anim = null;
 
-            if (YE.Tool.judge.isString(arguments[0])) {
-                anim = this.getAnim(arguments[0]);
+                if (YE.Tool.judge.isString(arguments[0])) {
+                    anim = this.getAnim(arguments[0]);
+                }
+                else {
+                    anim = arguments[0];
+                }
+
+                if (tag) {
+                    anim.setTag(tag);
+                }
+
+                anim.start();
+
+                return anim;
+            },
+            stopAnim: function (animName) {
+                this.getAnim(animName).stop();
+            },
+            startAnim: function (animName) {
+                this.getAnim(animName).start();
+            },
+            getAnim: function (animName) {
+                return this.ye_animationFrame.getAnim(animName);
+            },
+            getAnims: function () {
+                return this.ye_animationFrame.getAnims();
+            },
+            addAnim: function (animName, anim) {
+                anim.setTag(animName);
+                this.ye_animationFrame.addAnim(animName, anim);
+            },
+            resetAnim: function (animName) {
+                this.getAnim(animName).reset();
             }
-            else {
-                anim = arguments[0];
+        },
+        Static: {
+            create: function () {
+                return new this();
             }
-
-            if (tag) {
-                anim.setTag(tag);
+        }
+    });
+}());
+(function () {
+    YE.AnimationManager = YYC.Class(YE.CollectionManager, {
+        Init: function () {
+            this.base();
+        },
+        Public: {
+        },
+        Static: {
+            create: function () {
+                return new this();
             }
-
-            anim.start();
-
-            return anim;
-        },
-        stopAnim: function (animName) {
-            this.getAnim(animName).stop();
-        },
-        startAnim: function (animName) {
-            this.getAnim(animName).start();
-        },
-        getAnim: function (animName) {
-            return this.ye_animationFrame.getAnim(animName);
-        },
-        getAnims: function () {
-            return this.ye_animationFrame.getAnims();
-        },
-        addAnim: function (animName, anim) {
-            anim.setTag(animName);
-            this.ye_animationFrame.addAnim(animName, anim);
-        },
-        resetAnim: function (animName) {
-            this.getAnim(animName).reset();
         }
-    },
-    Static: {
-        create: function () {
-            return new this();
-        }
-    }
-});
-
-YE.AnimationManager = YYC.Class(YE.CollectionManager, {
-    Init: function () {
-        this.base();
-    },
-    Public: {
-    },
-    Static: {
-        create: function () {
-            return new this();
-        }
-    }
-});
-
+    });
+}());
 (function () {
     YE.Frame = YYC.Class(YE.Entity, {
         Init: function (bitmap, rect) {
@@ -3021,7 +2922,7 @@ YE.AnimationManager = YYC.Class(YE.CollectionManager, {
 (function () {
     var _instance = null;
 
-    var GameStatus = {
+    var GameState = {
         NORMAL: 0,
         PAUSE: 1,
         END: 2
@@ -3056,7 +2957,7 @@ YE.AnimationManager = YYC.Class(YE.CollectionManager, {
             ye_isRequestAnimFrameLoopAdded: false,
 
             //内部游戏状态
-            ye_gameStatus: null,
+            ye_gameState: null,
             //计时器序号
             ye_timerIndex: 0,
 
@@ -3149,7 +3050,7 @@ YE.AnimationManager = YYC.Class(YE.CollectionManager, {
                 this.setCurrentScene(scene);
 
                 this.ye_startTime = this.ye_getTimeNow();
-                this.ye_gameStatus = GameStatus.NORMAL;
+                this.ye_gameState = GameState.NORMAL;
 
                 this.ye_startLoop();
             },
@@ -3168,19 +3069,19 @@ YE.AnimationManager = YYC.Class(YE.CollectionManager, {
                 return this.ye_fps;
             },
             getPixPerFrame: function (speed) {
-                if (YE.main.getConfig().isDebug) {
-                    return speed / this.ye_STARTING_FPS;
-                }
+//                if (YE.main.getConfig().isDebug) {
+                return speed / this.ye_STARTING_FPS;
+//                }
 
-                return speed / this.ye_fps;
+//                return speed / this.ye_fps;
             },
             end: function () {
                 this.ye_endNextLoop();
-                this.ye_gameStatus = GameStatus.END;
+                this.ye_gameState = GameState.END;
                 YE.Tool.asyn.clearAllTimer(this.ye_timerIndex);
             },
             pause: function () {
-                if (this.ye_gameStatus === GameStatus.PAUSE) {
+                if (this.ye_gameState === GameState.PAUSE) {
                     return YE.returnForTest;
                 }
 
@@ -3189,16 +3090,16 @@ YE.AnimationManager = YYC.Class(YE.CollectionManager, {
 
                 this.ye_lastLoopInterval = this.ye_loopInterval;
                 this.ye_endNextLoop();
-                this.ye_gameStatus = GameStatus.PAUSE;
+                this.ye_gameState = GameState.PAUSE;
             },
             resume: function () {
-                if (this.ye_gameStatus !== GameStatus.PAUSE) {
+                if (this.ye_gameState !== GameState.PAUSE) {
                     return YE.returnForTest;
                 }
 
                 this.ye_loopInterval = this.ye_lastLoopInterval;
                 this.ye_restart();
-                this.ye_gameStatus = GameStatus.NORMAL;
+                this.ye_gameState = GameState.NORMAL;
             },
             /**
              * 设置主循环间隔时间
@@ -3221,8 +3122,8 @@ YE.AnimationManager = YYC.Class(YE.CollectionManager, {
             },
 
             //*供测试使用
-            forTest_getGameStatus: function () {
-                return GameStatus;
+            forTest_getGameState: function () {
+                return GameState;
             },
             forTest_getLoopType: function () {
                 return LoopType;
@@ -3349,9 +3250,6 @@ YE.AnimationManager = YYC.Class(YE.CollectionManager, {
                 if (!this.ye___graphics) {
                     this.ye___graphics = YE.Graphics.create(this.getContext());
                 }
-//                else {
-//                    this.ye___graphics.setContext(this.getContext());
-//                }
 
                 return this.ye___graphics;
             },
@@ -3851,51 +3749,53 @@ YE.AnimationManager = YYC.Class(YE.CollectionManager, {
         }
     });
 }());
-namespace("YE").Event = {
-    //事件枚举值
-    KEY_DOWN: 0,
-    KEY_UP: 1,
-    KEY_PRESS: 2,
+(function () {
+    YE.Event = {
+        //事件枚举值
+        KEY_DOWN: 0,
+        KEY_UP: 1,
+        KEY_PRESS: 2,
 
-    MOUSE_MOVE: 3,
-    MOUSE_OUT: 4,
-    MOUSE_OVER: 5,
-    MOUSE_DOWN: 6,
-    MOUSE_UP: 7,
-    CLICK: 8,
-    CONTEXTMENU: 9,
+        MOUSE_MOVE: 3,
+        MOUSE_OUT: 4,
+        MOUSE_OVER: 5,
+        MOUSE_DOWN: 6,
+        MOUSE_UP: 7,
+        CLICK: 8,
+        CONTEXTMENU: 9,
 
-    //按键枚举值
-    KeyCodeMap: {
-        A: 65,
-        B: 66,
-        C: 67,
-        D: 68,
-        E: 69,
-        F: 70,
-        G: 71,
-        H: 72,
-        I: 73,
-        J: 74,
-        K: 75,
-        L: 76,
-        M: 77,
-        N: 78,
-        O: 79,
-        P: 80,
-        Q: 81,
-        R: 82,
-        S: 83,
-        T: 84,
-        U: 85,
-        V: 86,
-        W: 87,
-        X: 88,
-        Y: 89,
-        Z: 90,
-        SPACE: 32
-    }
-};
+        //按键枚举值
+        KeyCodeMap: {
+            A: 65,
+            B: 66,
+            C: 67,
+            D: 68,
+            E: 69,
+            F: 70,
+            G: 71,
+            H: 72,
+            I: 73,
+            J: 74,
+            K: 75,
+            L: 76,
+            M: 77,
+            N: 78,
+            O: 79,
+            P: 80,
+            Q: 81,
+            R: 82,
+            S: 83,
+            T: 84,
+            U: 85,
+            V: 86,
+            W: 87,
+            X: 88,
+            Y: 89,
+            Z: 90,
+            SPACE: 32
+        }
+    };
+}());
 (function () {
     var _keyListeners = {};
 
@@ -3991,6 +3891,406 @@ namespace("YE").Event = {
         }
     };
 }());
+
+(function () {
+    //todo 增加cache机制
+    //todo 增强浏览器兼容性
+
+    var AudioType = {
+            NONE: 0,
+            WEBAUDIO: 1,
+            HTML5AUDIO: 2
+        },
+        PlayState = {
+            NONE: 0,
+            PLAYING: 1,
+            END: 2
+        };
+    var _audioType = null,
+        _ctx = null,
+        _audioObj = null;
+    var AudioBase = null,
+        WebAudio = null,
+        Html5Audio = null;
+
+    _audioDetect();
+
+    function _audioDetect() {
+        try {
+            var contextClass = window.AudioContext ||
+                window.webkitAudioContext ||
+                window.mozAudioContext ||
+                window.oAudioContext ||
+                window.msAudioContext;
+            if (contextClass) {
+                _ctx = new contextClass();
+                _audioType = AudioType.WEBAUDIO;
+            }
+            else {
+                _html5AudioDetect();
+            }
+        }
+        catch (e) {
+            _html5AudioDetect();
+        }
+    }
+
+    function _html5AudioDetect() {
+        if (typeof Audio !== "undefined") {
+            try {
+                new Audio();
+                _audioType = AudioType.HTML5AUDIO;
+            }
+            catch (e) {
+                _audioType = AudioType.NONE;
+            }
+        }
+        else {
+            _audioType = AudioType.HTML5AUDIO;
+        }
+    }
+
+
+    var SoundManager = YYC.Class({
+        Init: function (config) {
+            this.ye_config = config;
+        },
+        Private: {
+            ye_config: null
+        },
+        Public: {
+            initWhenCreate: function () {
+                switch (_audioType) {
+                    case AudioType.WEBAUDIO:
+                        _audioObj = WebAudio.create(this.ye_config);
+                        break;
+                    case AudioType.HTML5AUDIO:
+                        _audioObj = Html5Audio.create(this.ye_config);
+                        break;
+                    case AudioType.NONE:
+                        YE.log("浏览器不支持Web Audio和Html5 Audio");
+                        return YE.returnForTest;
+                        break;
+                    default:
+                        return YE.returnForTest;
+                        break;
+                }
+
+                _audioObj.load();
+            },
+            play: function () {
+                _audioObj.play();
+            },
+            getPlayState: function () {
+                return _audioObj.getPlayState();
+            },
+
+
+            forTest_setAudioObj: function (obj) {
+                _audioObj = obj;
+            },
+            forTest_setAudioType: function (type) {
+                _audioType = type;
+            },
+            forTest_getAudioTypeEnum: function () {
+                return AudioType;
+            },
+            forTest_getPlayStateEnum: function () {
+                return PlayState;
+            },
+            forTest_getAudioBase: function () {
+                return AudioBase;
+            },
+            forTest_getWebAudio: function () {
+                return WebAudio;
+            },
+            forTest_getHtml5Audio: function () {
+                return Html5Audio;
+            }
+        },
+        Static: {
+            create: function (config) {
+                var manager = new this(config);
+
+                manager.initWhenCreate();
+
+                return manager;
+            }
+        }
+    });
+
+    (function () {
+        AudioBase = YYC.AClass({
+            Private: {
+                ye_getCanPlayUrl: function () {
+                    var self = this,
+                        canPlayUrl = null;
+
+                    this.ye_P_urlArr.forEach(function (url) {
+                        var result = url.match(/\.(\w+)$/);
+
+                        if (result === null) {
+                            YE.error(true, "声音url错误，必须加上类型后缀名");
+                            return $break;
+                        }
+
+                        if (self.ye_canplay(result[1])) {
+                            canPlayUrl = url;
+                            return $break;
+                        }
+                    });
+
+                    if (canPlayUrl === null) {
+                        YE.error(true, "浏览器不支持该声音格式");
+                        return;
+                    }
+
+                    return canPlayUrl;
+                },
+                ye_canplay: function (mimeType) {
+                    var audio = new Audio(),
+                        mimeStr = null;
+
+                    //todo 完善mimeType
+                    switch (mimeType) {
+                        case 'mp3':
+                            mimeStr = "audio/mpeg";
+                            break;
+//                    case 'vorbis':
+//                        mimeStr = "audio/ogg; codecs='vorbis'";
+//                        break;
+//                    case 'opus':
+//                        mimeStr = "audio/ogg; codecs='opus'";
+////                        break;
+//                    case 'webm':
+//                        mimeStr = "audio/webm; codecs='vorbis'";
+//                        break;
+//                    case 'mp4':
+//                        mimeStr = "audio/mp4; codecs='mp4a.40.5'";
+//                        break;
+                        case 'wav':
+                            mimeStr = "audio/wav";
+                            break;
+                        default :
+                            YE.error(true, "声音类型错误");
+                            break;
+                    }
+
+                    if (mimeType == 'mp3' && YE.Tool.judge.browser.isFF()) {
+                        return false;
+                    }
+
+                    return !!audio.canPlayType && audio.canPlayType(mimeStr) !== "";
+                }
+            },
+            Protected: {
+                ye_P_urlArr: null,
+                ye_P_url: null
+            },
+            Public: {
+                initWhenCreate: function () {
+                    this.ye_P_url = this.ye_getCanPlayUrl();
+                }
+            },
+            Abstract: {
+                play: function () {
+                },
+                load: function () {
+                },
+                getPlayState: function () {
+                }
+            }
+        });
+
+        WebAudio = YYC.Class(AudioBase, {
+            Init: function (config) {
+                this.ye__config = config;
+
+                this.ye_P_urlArr = config.urlArr;
+                this.ye__onLoad = config.onLoad;
+                this.ye__onError = config.onError;
+            },
+            Private: {
+                ye__buffer: null,
+                ye__bufferSource: null,
+                ye__onLoad: null,
+                ye__onError: null,
+                ye__config: null,
+                ye__playState: null,
+
+                ye__loadBuffer: function (obj, url) {
+                    var self = this;
+
+                    YE.$.ajax({
+                        type: "get",
+                        url: url,
+                        dataType: "arraybuffer",
+                        success: function (data) {
+                            self.ye__decodeAudioData(data, obj);
+                        },
+                        error: function () {
+                            YE.log("使用Web Audio加载失败！尝试使用Html5 Audio加载");
+                            _audioObj = Html5Audio.create(self.ye__config);
+                            _audioObj.load();
+                        }
+                    });
+                },
+                ye__decodeAudioData: function (arraybuffer, obj) {
+                    var self = this;
+
+                    _ctx.decodeAudioData(
+                        arraybuffer,
+                        function (buffer) {
+                            if (buffer) {
+                                self.ye__buffer = buffer;
+                                self.ye__onLoad(self);
+                            }
+                        },
+                        function (err) {
+                            obj.ye__onError(err.err);
+                        }
+                    );
+                }
+            },
+            Public: {
+                initWhenCreate: function () {
+                    this.base();
+
+                    this.ye__playState = PlayState.NONE;
+                },
+                load: function () {
+                    this.ye__loadBuffer(this, this.ye_P_url);
+                },
+                play: function () {
+                    var source = _ctx.createBufferSource(),
+                        self = this;
+
+                    source.buffer = this.ye__buffer;
+                    source.connect(_ctx.destination);
+                    source.start(0);
+                    this.ye__playState = PlayState.PLAYING;
+
+                    /*!
+                     有问题！线程阻塞时可能会不触发onended！
+                     因此使用timer代替
+                     source.onended = function(){
+                     self.ye__status = 2;
+                     };*/
+
+                    setTimeout(function () {
+                        self.ye__playState = PlayState.END;
+                    }, this.ye__buffer.duration * 1000);
+                },
+                getPlayState: function () {
+                    return this.ye__playState;
+                },
+
+
+                forTest_setAudioContext: function (ctx) {
+                    _ctx = ctx;
+                }
+            },
+            Static: {
+                create: function (config) {
+                    var audio = new this(config);
+
+                    audio.initWhenCreate();
+
+                    return audio;
+                }
+            }
+        });
+
+        Html5Audio = YYC.Class(AudioBase, {
+            Init: function (config) {
+                this.ye_P_urlArr = config.urlArr;
+                this.ye__onLoad = config.onLoad;
+                this.ye__onError = config.onError;
+            },
+            Private: {
+                ye__audio: null,
+                ye__onLoad: null,
+                ye__onError: null,
+
+                ye__load: function () {
+                    //应该在绑定了事件后再设置src
+                    //因为设置src后，即会开始加载声音，所以事件handle越早有效越好。
+                    this.ye__audio.src = this.ye_P_url;
+                }
+            },
+            Public: {
+                load: function () {
+                    var self = this;
+
+                    this.ye__audio = new Audio();
+
+                    this.ye__audio.addEventListener("canplaythrough", function () {
+                        self.ye__onLoad(self);
+                    }, false);
+                    this.ye__audio.addEventListener("error", function () {
+                        self.ye__onError("errorCode " + self.ye__audio.error.code);
+                    }, false);
+//
+//                audio.autoplay = false;
+//                audio.preload = 'auto';
+//                audio.autobuffer = true;
+
+                    /*!
+                     audio在Chrome下必须被reloaded，否则只会播放一次
+                     audio在Firefox下不能被reloaded，否则会延迟
+                     */
+                    this.ye__audio.addEventListener("ended", function () {
+                        if (YE.Tool.judge.browser.isChrome()) {
+                            this.load();
+                        }
+                        else if (YE.Tool.judge.browser.isFF()) {
+                            this.currentTime = 0;
+                        }
+                        else {
+                            YE.error(true, "目前仅支持Chrome、Firefox浏览器");
+                        }
+                    }, false);
+
+                    this.ye__load();
+
+//                setTimeout(function () {
+//                }, 50);
+                },
+                play: function () {
+                    this.ye__audio.play();
+                },
+                getPlayState: function () {
+                    var playState = 0;
+
+                    if (this.ye__audio.ended) {
+                        playState = PlayState.END;
+                    }
+                    else if (this.ye__audio.currentTime > 0) {
+                        playState = PlayState.PLAYING;
+                    }
+                    else {
+                        playState = PlayState.NONE;
+                    }
+
+                    return playState;
+                }
+            },
+            Static: {
+                create: function (config) {
+                    var audio = new this(config);
+
+                    audio.initWhenCreate();
+
+                    return audio;
+                }
+            }
+        });
+    }());
+
+
+    YE.YSound = SoundManager;
+}());
+
 
 (function () {
     var _instance = null;
@@ -4156,7 +4456,7 @@ namespace("YE").Event = {
             },
             onResError: function (path, err) {
                 YE.log("加载" + path + "资源失败");
-                if(err){
+                if (err) {
                     YE.log(err);
                 }
             },
@@ -4185,12 +4485,16 @@ namespace("YE").Event = {
             ye_P_load: function (urlArr, key) {
                 var self = this;
 
-                YE.SoundManager.getInstance().createSound(urlArr, function () {
-                    YE.LoaderManager.getInstance().onResLoaded();
-                    self.ye_P_container.appendChild(key, this);
+                YE.YSound.create({
+                    urlArr: urlArr,
+                    onLoad: function (sound) {
+                        YE.LoaderManager.getInstance().onResLoaded();
+                        self.ye_P_container.appendChild(key, sound);
 
-                }, function (code) {
-                    YE.LoaderManager.getInstance().onResError(urlArr, "错误原因：code" + code);
+                    },
+                    onError: function (msg) {
+                        YE.LoaderManager.getInstance().onResError(urlArr, "错误原因：" + msg);
+                    }
                 });
             }
         },
@@ -4212,16 +4516,15 @@ namespace("YE").Event = {
             this.base();
         },
         Private: {
-            ye_counter: 0
+            ye_counter: 0,
+
+            ye_playOnlyOneSimultaneously: function (audioObject) {
+                if (audioObject.getPlayState() !== 1) {
+                    audioObject.play();
+                }
+            }
         },
         Public: {
-            createSound: function (urlArr, onload, onerror) {
-                YE.YSoundEngine.create({
-                    urlArr: urlArr,
-                    onload: onload,
-                    onerror: onerror
-                });
-            },
             play: function (soundId) {
                 var sound = YE.SoundLoader.getInstance().get(soundId),
                     audioObject = null;
@@ -4236,7 +4539,7 @@ namespace("YE").Event = {
 
                 audioObject = sound[this.ye_counter];
                 this.ye_counter++;
-                audioObject.play();
+                this.ye_playOnlyOneSimultaneously(audioObject);
             }
         },
         Static: {
@@ -5392,7 +5695,7 @@ namespace("YE").Event = {
                             tags.forEach(function (tag) {
                                 childTag.forEach(function (t) {
                                     if (t === tag) {
-                                        func&&func(child);
+                                        func && func(child);
                                         throw breakOuter;
                                     }
                                 });
@@ -5556,144 +5859,6 @@ namespace("YE").Event = {
         Static: {
             create: function (context) {
                 return new this(context);
-            }
-        }
-    });
-}());
-(function () {
-    YE.YSoundEngine = YYC.Class({
-        Init: function (config) {
-            this.ye_urlArr = config.urlArr;
-            this.ye_onload = config.onload;
-            this.ye_onerror = config.onerror;
-        },
-        Private: {
-            ye_audio: null,
-            ye_urlArr: null,
-            ye_onload: null,
-            ye_onerror: null,
-
-            ye_load: function () {
-                //应该在绑定了事件后再设置src
-                //因为设置src后，即会开始加载声音，所以事件handle越早有效越好。
-                this.ye_audio.src = this.ye_getCanPlayUrl();
-            },
-            ye_getCanPlayUrl: function () {
-                var self = this,
-                    canPlayUrl = null;
-
-                this.ye_urlArr.forEach(function (url) {
-                    var result = url.match(/\.(\w+)$/);
-
-                    if (result === null) {
-                        YE.error(true, "声音url错误，必须加上类型后缀名");
-                        return $break;
-                    }
-
-                    if (self.ye_canplay(result[1])) {
-                        canPlayUrl = url;
-                        return $break;
-                    }
-                });
-
-                if (canPlayUrl === null) {
-                    YE.error(true, "浏览器不支持该声音格式");
-                    return;
-                }
-
-                return canPlayUrl;
-            },
-            ye_canplay: function (mimeType) {
-                var audio = new Audio(),
-                    mimeStr = null;
-
-                switch (mimeType) {
-                    case 'mp3':
-                        mimeStr = "audio/mpeg";
-                        break;
-//                    case 'vorbis':
-//                        mimeStr = "audio/ogg; codecs='vorbis'";
-//                        break;
-//                    case 'opus':
-//                        mimeStr = "audio/ogg; codecs='opus'";
-////                        break;
-//                    case 'webm':
-//                        mimeStr = "audio/webm; codecs='vorbis'";
-//                        break;
-//                    case 'mp4':
-//                        mimeStr = "audio/mp4; codecs='mp4a.40.5'";
-//                        break;
-                    case 'wav':
-                        mimeStr = "audio/wav";
-                        break;
-                    default :
-                        YE.error(true, "声音类型错误");
-                        break;
-                }
-
-                if (mimeType == 'mp3' && YE.Tool.judge.browser.isFF()) {
-                    return false;
-                }
-
-                return !!audio.canPlayType && audio.canPlayType(mimeStr) !== "";
-            }
-        },
-        Public: {
-            initWhenCreate: function () {
-                var self = this;
-
-                if (!Audio) {
-                    YE.log("浏览器不支持Audio对象");
-                    return YE.returnForTest;
-                }
-
-                this.ye_audio = new Audio();
-
-                this.ye_audio.addEventListener("canplaythrough", function () {
-                    self.ye_onload.call(self, null);
-                }, false);
-                this.ye_audio.addEventListener("error", function () {
-                    self.ye_onerror.call(self, self.ye_audio.error.code);
-                }, false);
-//
-//                audio.autoplay = false;
-//                audio.preload = 'auto';
-//                audio.autobuffer = true;
-
-                /*!
-                 Audio still doesn't work consistently across all browsers, as of right now:
-
-                 An element must be reloaded in Chrome or it will only play once
-                 An element must not be reloaded in Firefox or there will be a delay
-                 */
-                this.ye_audio.addEventListener("ended", function () {
-                    if (YE.Tool.judge.browser.isChrome()) {
-                        this.load();
-                    }
-                    else if (YE.Tool.judge.browser.isFF()) {
-                        this.currentTime = 0;
-                    }
-                    else {
-                        YE.error(true, "目前仅支持chrome、firefox浏览器");
-                    }
-                }, false);
-
-                this.ye_load();
-//
-                setTimeout(function () {
-                }, 50);
-            },
-            play: function () {
-                this.ye_audio.play();
-            }
-        },
-        Static: {
-            create: function (config) {
-                var engine = new this(config);
-
-                engine.initWhenCreate();
-
-                return engine;
             }
         }
     });

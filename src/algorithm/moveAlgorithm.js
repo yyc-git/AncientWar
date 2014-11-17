@@ -137,8 +137,10 @@ var moveAlgorithm = (function () {
                 angle = this._findAngleBaseOnXPositiveAxisByDirection(direction, directions);
             }
 
-            return [YYC.Tool.math.toFixed(YE.Director.getInstance().getPixPerFrame(speed) * Math.cos(angle), 4),
-                YYC.Tool.math.toFixed(YE.Director.getInstance().getPixPerFrame(speed) * Math.sin(angle), 4)];
+            speed = YE.Director.getInstance().getPixPerFrame(speed);
+
+            return [YYC.Tool.math.toFixed(speed * Math.cos(angle), 4),
+                YYC.Tool.math.toFixed(speed * Math.sin(angle), 4)];
         },
         findAccurateDirectionByMovement: function (movement) {
             var direction = this.findAccurateDirectionInPix([0, 0], movement);

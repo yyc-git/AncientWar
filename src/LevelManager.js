@@ -67,8 +67,6 @@
 
                 ui.showLevelBrif(this.getLevelData().brief);
 
-                loaderManager.preload(this._getLevelResource());
-
                 loaderManager.onloading = function (currentLoad, resCount) {
                     ui.showLoadingMessage("正在加载第" + currentLoad + "/" + resCount + "个资源");
                 };
@@ -76,6 +74,8 @@
                     isLoaded = true;
                     self.initAnimation();
                 };
+
+                loaderManager.preload(this._getLevelResource());
 
                 setTimeout(function () {
                      if(!isLoaded){
@@ -105,10 +105,10 @@
                 setTimeout(function () {
                     var animPool = AnimPool.getInstance();
 
-                    animPool.initWithFile("anim_archer_json");
-                    animPool.initWithFile("anim_arrow_json");
-                    animPool.initWithFile("anim_farmer_json");
-                    animPool.initWithFile("anim_buildingEffect_json");
+//                    animPool.initWithFile("anim_archer_json");
+//                    animPool.initWithFile("anim_arrow_json");
+//                    animPool.initWithFile("anim_farmer_json");
+//                    animPool.initWithFile("anim_buildingEffect_json");
 
 //
                     ui.showEnterGame();

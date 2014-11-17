@@ -679,7 +679,7 @@ var GatherMeat = YYC.Class(ResourceAction, {
                 base = null;
 //
             base = moveAlgorithm.findNearestSprite(this.getTarget(), BaseSprite, function (sprite) {
-                return sprite.team === self.team && !sprite.isBuildState();
+                return sprite.team === self.team && !sprite.isBuildState() && !sprite.isDead();
             });
 
             if (base === null) {
