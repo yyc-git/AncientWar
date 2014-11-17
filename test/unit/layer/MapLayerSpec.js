@@ -371,7 +371,7 @@ describe("MapLayer", function () {
         });
     });
 
-    describe("设置可通过的地形数据", function(){
+    describe("设置可通过的地形数据", function () {
         var terrainData = null;
 
         function buildInitGrid() {
@@ -398,12 +398,12 @@ describe("MapLayer", function () {
         describe("getUnitPassableGridData", function () {
             function buildFakeItem(passableGrid, gridX, gridY, tag, uid, isDead) {
                 return {
+                    _tag: tag || "resource",
                     passableGrid: passableGrid,
                     gridX: gridX,
                     gridY: gridY,
                     hasTag: function (t) {
-                        tag = tag || "resource";
-                        return t === tag;
+                        return t === this._tag;
                     },
                     getUid: function () {
                         return uid;
@@ -414,7 +414,7 @@ describe("MapLayer", function () {
                 }
             }
 
-            it("如果精灵已死亡，则精灵所在方格为可通过", function () {
+            it("已死亡的精灵所在方格为可通过", function () {
                 var item = buildFakeItem(null, 0, 0, "unit", 1, true);
                 sandbox.stub(window, "entityLayer", {
                     getChilds: function () {
@@ -430,116 +430,88 @@ describe("MapLayer", function () {
                     [0, 0, 0, 0]
                 ]);
             });
-            it("如果精灵不是方格精灵，则精灵所在方格为可通过", function () {
-                sandbox.stub(tool, "isGridSprite").returns(false);
+
+
+            it("当前单位精灵所在方格可通过，其余单位精灵所在方格为不可通过；其余精灵则根据其passableGrid设置地形数据，0为可通过，1为不可通过", function () {
+                var item1 = buildFakeItem(null, 0, 0, "unit", 1),
+                    item2 = buildFakeItem([
+                        [1, 0, 1]
+                    ], 0, 1, "building", 2) ,
+                    item3 = buildFakeItem([
+                        [0, 0, 1]
+                    ], 1, 2, "terrain", 3),
+                    item4 = buildFakeItem(null, 0, 2, "unit", 4);
                 sandbox.stub(window, "entityLayer", {
                     getChilds: function () {
-                        return [
-                            {}
-                        ];
+                        return [item1, item2, item3, item4];
                     }
                 });
 
-                var passableGridData = layer.getUnitPassableGridData();
+                var passableGridData = layer.getUnitPassableGridData(4);
 
                 expect(passableGridData).toEqual([
+                    [1, 0, 0, 0] ,
+                    [1, 0, 1, 0],
+                    [0, 0, 0, 1]
+                ]);
+            });
+        });
+
+        describe("buildPassableGrid", function () {
+            function buildFakeItem(passableGrid, gridX, gridY, tag, isBuildState, isDead) {
+                return {
+                    passableGrid: passableGrid,
+                    gridX: gridX,
+                    gridY: gridY,
+                    hasTag: function (t) {
+                        tag = tag || "resource";
+                        return t === tag;
+                    },
+                    isBuildState: function () {
+                        return  isBuildState || false;
+                    },
+                    isDead: function () {
+                        return isDead || false;
+                    }
+                }
+            }
+
+            it("如果精灵已死亡，则精灵所在方格为可通过", function () {
+                var item = buildFakeItem([1, 1], 0, 0, "building", false, true);
+                sandbox.stub(window, "entityLayer", {
+                    getChildsByTag: function () {
+                        return [item];
+                    }
+                });
+
+                layer.buildPassableGrid();
+
+                expect(layer.passableGridData).toEqual([
                     [0, 0, 0, 0] ,
                     [0, 0, 0, 0],
                     [0, 0, 0, 0]
                 ]);
             });
-
-            describe("否则", function () {
-                beforeEach(function () {
-                    sandbox.stub(tool, "isGridSprite").returns(true);
-                });
-                afterEach(function () {
-                });
-
-                it("当前单位精灵所在方格可通过，其余单位精灵所在方格为不可通过；其余精灵则根据其passableGrid设置地形数据，0为可通过，1为不可通过", function () {
-                    var item1 = buildFakeItem(null, 0, 0, "unit", 1),
-                        item2 = buildFakeItem([
-                            [1, 0, 1]
-                        ], 0, 1
-                            , 2) ,
-                        item3 = buildFakeItem([
-                            [0, 0, 1]
-                        ], 1, 2
-                            , 3);
-                    sandbox.stub(window, "entityLayer", {
-                        getChilds: function () {
-                            return [item1, item2, item3];
-                        }
-                    });
-
-                    var passableGridData = layer.getUnitPassableGridData(4);
-
-                    expect(passableGridData).toEqual([
-                        [1, 0, 0, 0] ,
-                        [1, 0, 1, 0],
-                        [0, 0, 0, 1]
-                    ]);
-                });
-            });
-        });
-
-        describe("buildPassableGrid", function () {
-            describe("设置passableGridData数组", function () {
-                function buildFakeItem(passableGrid, gridX, gridY, tag, isBuildState, isDead) {
-                    return {
-                        passableGrid: passableGrid,
-                        gridX: gridX,
-                        gridY: gridY,
-                        hasTag: function (t) {
-                            tag = tag || "resource";
-                            return t === tag;
-                        },
-                        isBuildState: function () {
-                            return  isBuildState || false;
-                        },
-                        isDead: function () {
-                            return isDead || false;
-                        }
+            it("根据精灵的passableGrid设置地形数据，0为可通过，1为不可通过", function () {
+                var item1 = buildFakeItem([
+                        [1, 0, 1]
+                    ], 0, 1) ,
+                    item2 = buildFakeItem([
+                        [0, 0, 1]
+                    ], 1, 2);
+                sandbox.stub(window, "entityLayer", {
+                    getChildsByTag: function () {
+                        return [item1, item2];
                     }
-                }
-
-                it("如果精灵已死亡，则精灵所在方格为可通过", function () {
-                    var item = buildFakeItem([1, 1], 0, 0, "building", false, true);
-                    sandbox.stub(window, "entityLayer", {
-                        getChildsByTag: function () {
-                            return [item];
-                        }
-                    });
-
-                    layer.buildPassableGrid();
-
-                    expect(layer.passableGridData).toEqual([
-                        [0, 0, 0, 0] ,
-                        [0, 0, 0, 0],
-                        [0, 0, 0, 0]
-                    ]);
                 });
-                it("根据精灵的passableGrid设置地形数据，0为可通过，1为不可通过", function () {
-                    var item1 = buildFakeItem([
-                            [1, 0, 1]
-                        ], 0, 1) ,
-                        item2 = buildFakeItem([
-                            [0, 0, 1]
-                        ], 1, 2);
-                    sandbox.stub(window, "entityLayer", {
-                        getChildsByTag: function () {
-                            return [item1, item2];
-                        }
-                    });
 
-                    layer.buildPassableGrid();
+                layer.buildPassableGrid();
 
-                    expect(layer.passableGridData).toEqual([
-                        [0, 0, 0, 0] ,
-                        [1, 0, 1, 0],
-                        [0, 0, 0, 1]
-                    ]);
-                });
+                expect(layer.passableGridData).toEqual([
+                    [0, 0, 0, 0] ,
+                    [1, 0, 1, 0],
+                    [0, 0, 0, 1]
+                ]);
             });
         });
     });

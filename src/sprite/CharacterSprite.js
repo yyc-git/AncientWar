@@ -27,6 +27,7 @@ var CharacterSprite = YYC.Class(EntitySprite, {
         ____waitingBeginTime: 0,
         ____isWaitingFlag: false,
         ____isMovingFlag: false,
+        ____isPrepareForFindNewPathWithUnit: false,
 
         ____continueLastMove: function () {
             var moveData = {
@@ -36,10 +37,10 @@ var CharacterSprite = YYC.Class(EntitySprite, {
 
             this.____move(moveData, this.____last_dest);
         },
-        ____makeFindPathFeasible: function (grid, destination) {
-            grid[destination[1]][destination[0]] = 0;
+        ____makeGridReachable: function (passableGridData, destination) {
+            passableGridData[destination[1]][destination[0]] = 0;
 
-            return grid;
+            return passableGridData;
         },
         ____wait: function (nextPos, nextDirection) {
             this.____isMovingFlag = false;
@@ -111,13 +112,9 @@ var CharacterSprite = YYC.Class(EntitySprite, {
             }
         },
         ____prepareForFindNewPathWithUnit: function () {
-            var onlyUnitPassableGridData = null;
-
-            onlyUnitPassableGridData = window.mapLayer.getUnitPassableGridData(this.getUid());
             this.____path = null;
             this.isCollisionMove = false;
-
-            return onlyUnitPassableGridData;
+            this.____isPrepareForFindNewPathWithUnit = true;
         },
         ____isChangeDest: function (newDest, oldDest) {
             return !tool.isEqualGrid(newDest, oldDest);
@@ -233,20 +230,37 @@ var CharacterSprite = YYC.Class(EntitySprite, {
             this.____move(collisionData, dest_floorGrid);
         },
         ____getCollisionObjects: function (nextPos) {
-            var grid = window.mapLayer.passableGridData;
-            var nextGrid = tool.convertToGrid(nextPos[0], nextPos[1]);
-            var units = this.getParent().getChildsByTag("unit");
+            var passableGridData = null,
+                nextGrid = null,
+                units = null;
 
-            return this.P____steer.getCollisionObjects(grid, nextGrid, units, this.getUid(), this.radius);
+            passableGridData = window.mapLayer.passableGridData;
+            nextGrid = tool.convertToGrid(nextPos[0], nextPos[1]);
+            units = this.getParent().getChildsByTag("unit");
+
+            return this.P____steer.getCollisionObjects(passableGridData, nextGrid, units, this.getUid(), this.radius);
         },
-        ____findPath: function (grid, current_floorGrid, dest_floorGrid) {
-            var pathGrid = grid;
+        ____findPath: function (passableGridData, current_floorGrid, dest_floorGrid) {
+            var gridData = passableGridData;
 
             if (moveAlgorithm.isDestCanNotPass(dest_floorGrid)) {
-                pathGrid = this.____makeFindPathFeasible(YE.Tool.extend.extendDeep(grid), dest_floorGrid);
+                gridData = this.____makeGridReachable(YE.Tool.extend.extendDeep(passableGridData), dest_floorGrid);
             }
 
-            return YE.AStar.aCompute(pathGrid, current_floorGrid, dest_floorGrid).path;
+            return YE.AStar.aCompute(gridData, current_floorGrid, dest_floorGrid).path;
+        },
+        ____getPassableGridData: function () {
+            var passableGridData = null;
+
+            if (this.____isPrepareForFindNewPathWithUnit) {
+                passableGridData = window.mapLayer.getUnitPassableGridData(this.getUid());
+                this.____isPrepareForFindNewPathWithUnit = false;
+            }
+            else {
+                passableGridData = window.mapLayer.passableGridData;
+            }
+
+            return passableGridData;
         }
     },
     Protected: {
@@ -352,8 +366,7 @@ var CharacterSprite = YYC.Class(EntitySprite, {
                 current_floorGrid = null,
                 dest_floorGrid = null,
                 current = null,
-                collisionData = null,
-                grid = null;
+                collisionData = null;
 
             current_floorGrid = [Math.floor(this.gridX), Math.floor(this.gridY)];
             dest_floorGrid = [Math.floor(destination[0]), Math.floor(destination[1])];
@@ -368,13 +381,11 @@ var CharacterSprite = YYC.Class(EntitySprite, {
                 window.mapLayer.buildPassableGrid();
             }
 
-            grid = window.mapLayer.passableGridData;
-
             this.countCollision(destination);
 
             if (this.isCollisionMove) {
                 if (this.____isOutOfDistance()) {
-                    grid = this.____prepareForFindNewPathWithUnit();
+                    this.____prepareForFindNewPathWithUnit();
                 }
                 else {
                     this.____collisionMove(destination);
@@ -393,7 +404,7 @@ var CharacterSprite = YYC.Class(EntitySprite, {
             }
             else {
                 if (this.isNeedFindPath(dest_floorGrid)) {
-                    this.____path = this.____findPath(grid, current_floorGrid, dest_floorGrid);
+                    this.____path = this.____findPath(this.____getPassableGridData(), current_floorGrid, dest_floorGrid);
                 }
 
                 if (!this.isFindPath()) {
@@ -480,27 +491,14 @@ var CharacterSprite = YYC.Class(EntitySprite, {
 
             this.getGraphics().drawCircle(mapLayer.getSelectionBorderColor(), 1, x, y, this.radius);
         },
-
-
-//        runDeadAnim: function () {
-//            this.runOnlyOneAnim("dead_" + moveAlgorithm.getDirectionRoundNumber(this.direction));
-//            this.setDeadState();
-//        },
-//        runDisappearAnim: function () {
-//            this.runOnlyOneAnim("disappear_" + moveAlgorithm.getDirectionRoundNumber(this.direction));
-//            this.setDisappearState();
-//        },
         stopMove: function () {
             this.____waitingBeginTime = 0;
             this.____isMovingFlag = false;
             this.____isWaitingFlag = false;
             this.____last_dest = null;
             this.isCollisionMove = false;
-//            this.____last_nextDirection = null;
-//            this.____last_nextPos = null;
             this.____path = null;
         },
-
         attack: function (target) {
             this.runAttackAction(target);
         },
