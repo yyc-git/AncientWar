@@ -287,41 +287,41 @@
         isInCircleRange: function (point1, point2, radius) {
             return this.getPointDistance(point1, point2) < radius;
         },
-        isInPointToDiamondBoxEdgeDistance: function (point, diamondBoxTopLeftVertex, distance) {
-            var pointToDiamondBoxEdgeDistance = this.getPointToDiamondBoxEdgeDistance(point, diamondBoxTopLeftVertex);
+        isInPointToDiamondBoxEdgeDistance: function (point, diamondBoxLeftUpVertex, distance) {
+            var pointToDiamondBoxEdgeDistance = this.getPointToDiamondBoxEdgeDistance(point, diamondBoxLeftUpVertex);
 
             return pointToDiamondBoxEdgeDistance < distance;
         },
         getPointDistance: function (point1, point2) {
             return Math.sqrt(Math.pow(point1[0] - point2[0], 2) + Math.pow(point1[1] - point2[1], 2));
         },
-        getPointToDiamondBoxEdgeDistance: function (point, diamondBoxTopLeftVertex) {
+        getPointToDiamondBoxEdgeDistance: function (point, diamondBoxLeftUpVertex) {
             var pointToDiamondBoxEdgeDistance = 0,
-                diamondBoxTopRightVertex = [diamondBoxTopLeftVertex[0] + 1, diamondBoxTopLeftVertex[1]],
-                diamondBoxBottomRightVertex = [diamondBoxTopLeftVertex[0] + 1, diamondBoxTopLeftVertex[1] + 1],
-                diamondBoxBottomLeftVertex = [diamondBoxTopLeftVertex[0], diamondBoxTopLeftVertex[1] + 1];
+                diamondBoxTopRightVertex = [diamondBoxLeftUpVertex[0] + 1, diamondBoxLeftUpVertex[1]],
+                diamondBoxBottomRightVertex = [diamondBoxLeftUpVertex[0] + 1, diamondBoxLeftUpVertex[1] + 1],
+                diamondBoxBottomLeftVertex = [diamondBoxLeftUpVertex[0], diamondBoxLeftUpVertex[1] + 1];
 
             //上/下
-            if (point[0] >= diamondBoxTopLeftVertex[0] && point[0] <= diamondBoxTopRightVertex[0]) {
-                if (point[1] <= diamondBoxTopLeftVertex[1]) {
-                    pointToDiamondBoxEdgeDistance = diamondBoxTopLeftVertex[1] - point[1];
+            if (point[0] >= diamondBoxLeftUpVertex[0] && point[0] <= diamondBoxTopRightVertex[0]) {
+                if (point[1] <= diamondBoxLeftUpVertex[1]) {
+                    pointToDiamondBoxEdgeDistance = diamondBoxLeftUpVertex[1] - point[1];
                 }
                 else if (point[1] >= diamondBoxBottomLeftVertex[1]) {
                     pointToDiamondBoxEdgeDistance = point[1] - diamondBoxBottomLeftVertex[1];
                 }
             }
             //左/右
-            else if (point[1] >= diamondBoxTopLeftVertex[1] && point[1] <= diamondBoxBottomLeftVertex[1]) {
-                if (point[0] <= diamondBoxTopLeftVertex[0]) {
-                    pointToDiamondBoxEdgeDistance = diamondBoxTopLeftVertex[0] - point[0];
+            else if (point[1] >= diamondBoxLeftUpVertex[1] && point[1] <= diamondBoxBottomLeftVertex[1]) {
+                if (point[0] <= diamondBoxLeftUpVertex[0]) {
+                    pointToDiamondBoxEdgeDistance = diamondBoxLeftUpVertex[0] - point[0];
                 }
                 else if (point[0] >= diamondBoxBottomRightVertex[0]) {
                     pointToDiamondBoxEdgeDistance = point[0] - diamondBoxBottomRightVertex[0];
                 }
             }
             //左上
-            else if (point[0] < diamondBoxTopLeftVertex[0] && point[1] < diamondBoxTopLeftVertex[1]) {
-                pointToDiamondBoxEdgeDistance = Math.sqrt(Math.pow(point[0] - diamondBoxTopLeftVertex[0], 2) + Math.pow(point[1] - diamondBoxTopLeftVertex[1], 2));
+            else if (point[0] < diamondBoxLeftUpVertex[0] && point[1] < diamondBoxLeftUpVertex[1]) {
+                pointToDiamondBoxEdgeDistance = Math.sqrt(Math.pow(point[0] - diamondBoxLeftUpVertex[0], 2) + Math.pow(point[1] - diamondBoxLeftUpVertex[1], 2));
             }
             //右上
             else if (point[0] > diamondBoxTopRightVertex[0] && point[1] < diamondBoxTopRightVertex[1]) {

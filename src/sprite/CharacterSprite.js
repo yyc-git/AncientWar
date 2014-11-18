@@ -18,6 +18,8 @@ var CharacterSprite = YYC.Class(EntitySprite, {
         this.radiusGrid = tool.convertToGridSize(this.radius);
         this.smallMapRadius = tool.convertToSmallMapPixSize(this.radius * 2);
 
+        this.____blockGrids = [];
+
         this.P____steer = new Steer();
     },
     Private: {
@@ -31,6 +33,7 @@ var CharacterSprite = YYC.Class(EntitySprite, {
         ____isWaitingFlag: false,
         ____isMovingFlag: false,
         ____isPrepareForFindNewPathWithUnit: false,
+        ____blockGrids: null,
 
         ____continueLastMove: function () {
             var moveData = {
@@ -40,8 +43,17 @@ var CharacterSprite = YYC.Class(EntitySprite, {
 
             this.____move(moveData, this.____last_dest);
         },
+        ____makePathReachable: function (passableGridData, dest) {
+//            this.____makeGridReachable(passableGridData, begin);
+            this.____makeGridReachable(passableGridData, dest);
+        },
         ____makeGridReachable: function (passableGridData, destination) {
             passableGridData[destination[1]][destination[0]] = 0;
+
+            return passableGridData;
+        },
+        ____makeGridUnReachable: function (passableGridData, destination) {
+            passableGridData[destination[1]][destination[0]] = 1;
 
             return passableGridData;
         },
@@ -87,8 +99,13 @@ var CharacterSprite = YYC.Class(EntitySprite, {
         ____getNextPathGrid: function (now) {
             if (tool.isEqualGrid(now, this.____path[0])) {
                 this.____path.shift();
-
             }
+
+            if(this.____path.length === 0){
+                YE.log("path数组中只有精灵当前所在方格");
+                return null;
+            }
+
             return this.____path[0];
         },
         ____move: function (collisionData, dest_floorGrid) {
@@ -161,10 +178,15 @@ var CharacterSprite = YYC.Class(EntitySprite, {
                 nextGrid = null,
                 current = null,
                 self = this,
+                objects =  collisionObjects,
                 newNextPos = null;
 
             nextGrid = tool.convertToGrid(nextPos[0], nextPos[1]);
             current = [this.gridX, this.gridY];
+
+            collisionObjects = collisionObjects.filter(function(obj){
+                return obj.collisionType !== "unitBlock";
+            });
 
             if (collisionObjects.length > 0) {
                 if (this.P____steer.highestPriorityCollisionObject &&
@@ -183,6 +205,11 @@ var CharacterSprite = YYC.Class(EntitySprite, {
 
                 if (moveAlgorithm.isDestCanNotPass(tool.convertToGrid(newNextPos))) {
                     this.runGuardAction();
+                }
+
+                if (this.____isMoveCyclic()) {
+                    this.____blockGrids = this.P____steer.getCollisionObjectBlockGrids(objects);
+                    this.P____steer.collisionRecordArr = [];
                 }
             }
             else {
@@ -243,27 +270,48 @@ var CharacterSprite = YYC.Class(EntitySprite, {
 
             return this.P____steer.getCollisionObjects(passableGridData, nextGrid, units, this.getUid(), this.radiusGrid);
         },
-        ____findPath: function (passableGridData, current_floorGrid, dest_floorGrid) {
-            var gridData = passableGridData;
+        ____findPath: function (current_floorGrid, dest_floorGrid) {
+            var self = this,
+                gridData = null;
 
-            if (moveAlgorithm.isDestCanNotPass(dest_floorGrid)) {
-                gridData = this.____makeGridReachable(YE.Tool.extend.extendDeep(passableGridData), dest_floorGrid);
+            gridData = this.____getPassableGridDataForFindPath();
+
+            if (moveAlgorithm.isDestCanNotPass(dest_floorGrid, gridData)
+                || moveAlgorithm.isDestCanNotPass(current_floorGrid, gridData)) {
+                gridData = this.____copyPassableGridData(gridData);
             }
+
+            if (this.____blockGrids.length > 0) {
+                gridData = this.____copyPassableGridData(gridData);
+                this.____blockGrids.forEach(function (grid) {
+                    self.____makeGridUnReachable(gridData, grid);
+                });
+
+                this.____blockGrids = [];
+            }
+
+            this.____makePathReachable(gridData, dest_floorGrid);
+            this.____makePathReachable(gridData, current_floorGrid);
+
+            this.____isPrepareForFindNewPathWithUnit = false;
 
             return YE.AStar.aCompute(gridData, current_floorGrid, dest_floorGrid).path;
         },
-        ____getPassableGridData: function () {
+        ____getPassableGridDataForFindPath: function () {
             var passableGridData = null;
 
             if (this.____isPrepareForFindNewPathWithUnit) {
                 passableGridData = window.mapLayer.getUnitPassableGridData(this.getUid());
-                this.____isPrepareForFindNewPathWithUnit = false;
+//                this.____isPrepareForFindNewPathWithUnit = false;
             }
             else {
                 passableGridData = window.mapLayer.passableGridData;
             }
 
             return passableGridData;
+        },
+        ____copyPassableGridData: function (passableGridData) {
+            return  this.____isPrepareForFindNewPathWithUnit ? passableGridData : YE.Tool.extend.extendDeep(passableGridData);
         }
     },
     Protected: {
@@ -342,7 +390,7 @@ var CharacterSprite = YYC.Class(EntitySprite, {
             return MoveTo.create(destination);
 //          return  YE.Sequence.create(
 //                YE.RepeatCondition.create(MoveToDest.create(destination), this, function () {
-//                    return !this.countCollision(destination);
+//                    return !this.countDestNearbyCollision(destination);
 //                }),
 //                this.getGuardAction());
         },
@@ -366,9 +414,18 @@ var CharacterSprite = YYC.Class(EntitySprite, {
         moveTo: function (destination) {
             this.runMoveToAction(destination);
         },
+        ____recordCollision: function () {
+            if (this.P____steer.colliding && this.____path) {
+                this.P____steer.recordCollision(this.____path);
+            }
+        },
+        ____isMoveCyclic: function () {
+            return this.P____steer.isMoveCyclic();
+        },
         moveToDest: function (destination) {
             var nextDirection = null,
                 nextPos = null,
+                nextGrid = null,
                 current_floorGrid = null,
                 dest_floorGrid = null,
                 current = null,
@@ -387,7 +444,8 @@ var CharacterSprite = YYC.Class(EntitySprite, {
                 window.mapLayer.buildPassableGrid();
             }
 
-            this.countCollision(destination);
+            this.countDestNearbyCollision(destination);
+            this.____recordCollision();
 
             if (this.isCollisionMove) {
                 if (this.____isOutOfDistance()) {
@@ -410,7 +468,7 @@ var CharacterSprite = YYC.Class(EntitySprite, {
             }
             else {
                 if (this.isNeedFindPath(dest_floorGrid)) {
-                    this.____path = this.____findPath(this.____getPassableGridData(), current_floorGrid, dest_floorGrid);
+                    this.____path = this.____findPath(current_floorGrid, dest_floorGrid);
                 }
 
                 if (!this.isFindPath()) {
@@ -421,7 +479,11 @@ var CharacterSprite = YYC.Class(EntitySprite, {
                     return;
                 }
 
-                var nextGrid = this.____getNextPathGrid(current_floorGrid);
+                nextGrid = this.____getNextPathGrid(current_floorGrid);
+
+                if(nextGrid === null){
+                    return;
+                }
 
                 nextDirection = moveAlgorithm.findAccurateDirection(current_floorGrid, nextGrid);
                 nextPos = this.____getNextPos(nextDirection);
@@ -452,7 +514,7 @@ var CharacterSprite = YYC.Class(EntitySprite, {
         getMoveDest: function () {
             return this.____last_dest;
         },
-        countCollision: function (destination) {
+        countDestNearbyCollision: function (destination) {
             if (this.P____steer.colliding) {
                 if (this.isNearDestination(destination)) {
                     this.P____steer.AddCollisionCount();

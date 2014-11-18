@@ -709,10 +709,11 @@ var moveAlgorithm = (function () {
 
             return nearestGrid;
         },
-        isDestCanNotPass: function (destGrid) {
-            var dest = [Math.floor(destGrid[0]), Math.floor(destGrid[1])];
+        isDestCanNotPass: function (destGrid, passableGridData) {
+            var dest = [Math.floor(destGrid[0]), Math.floor(destGrid[1])],
+                passableGridData = passableGridData || window.mapLayer.passableGridData;
 
-            return tool.isDestOutOfMap(dest) || window.mapLayer.passableGridData[dest[1]][dest[0]] === 1;
+            return tool.isDestOutOfMap(dest) || passableGridData[dest[1]][dest[0]] === 1;
         }
     }
 }());

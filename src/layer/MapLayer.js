@@ -579,7 +579,7 @@ var MapLayer = YYC.Class(YE.Layer, {
                 self = this;
 
             items = window.entityLayer.getChilds().filter(function (item) {
-                if (item.isDead()) {
+                if (item.isDead() || item.passableGrid === undefined) {
                     return false;
                 }
 
