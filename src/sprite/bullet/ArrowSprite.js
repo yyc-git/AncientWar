@@ -81,7 +81,7 @@ var ArrowSprite = YYC.Class(Sprite, {
                 attackedDest = this.__target.getAttackedPoint();
 
             if (tool.isUnitSprite(this.__target)) {
-                result = tool.isInCircleRange(attackedDest, [this.gridX, this.gridY], tool.convertToGridSize(this.__target.radius + 10));
+                result = tool.isInCircleRange(attackedDest, [this.gridX, this.gridY], this.__target.radiusGrid + 0.2);
             }
             else if (tool.isBuildingSprite(this.__target)) {
                 result = this.__isReacheDestination(attackedDest);

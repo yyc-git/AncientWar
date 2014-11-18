@@ -194,10 +194,8 @@
         getSmallDiamondSize: function () {
             return Math.sqrt(Math.pow(config.map.smallGridWidth / 2, 2) + Math.pow(config.map.smallGridHeight / 2, 2));
         },
-        convertToSmallMapGridSize: function (pix) {
-            var adjustmentFactor = 1;
-
-            return pix / (config.map.smallGridWidth + config.map.smallGridHeight) * adjustmentFactor;
+        convertToSmallMapPixSize:function(bigMapPixSize){
+             return bigMapPixSize / config.map.scale;
         },
 
         //计算鼠标坐标（相对于画布左上角）

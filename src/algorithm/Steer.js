@@ -11,7 +11,7 @@
 
     var Steer = YYC.Class({
         Private: {
-            _addCollisionTerrains: function (grid, nextX, nextY, radius, range) {
+            _addCollisionTerrains: function (grid, nextX, nextY, radiusGrid, range) {
                 var mapGridWidth = config.map.mapGridWidth,
                     mapGridHeight = config.map.mapGridHeight,
                     x1 = 0,
@@ -35,7 +35,7 @@
                     for (j = y1; j <= y2; j++) {
                         if (grid[j][i] == 1) {
                             if (tool.isInPointToDiamondBoxEdgeDistance([nextX, nextY], [i, j],
-                                tool.convertToGridSize(radius * 0.05))) {
+                                radiusGrid * 0.05)) {
                                 collisionObjects.push({collisionType: "gridHard", gridPos: [i, j ]});
                             }
                         }
@@ -48,17 +48,17 @@
 
                 return collisionObjects;
             },
-            _addCollisionUnits: function (nextX, nextY, radius, uid, units, range) {
+            _addCollisionUnits: function (nextX, nextY, radiusGrid, uid, units, range) {
                 var collisionObjects = [];
 
                 units.forEach(function (unit) {
                     if (unit.getUid() !== uid
                         && !unit.isDead()
                         && Math.abs(unit.gridX - nextX) <= range && Math.abs(unit.gridY - nextY) <= range) {
-                        if (tool.isInCircleRange([unit.gridX, unit.gridY], [nextX, nextY], tool.convertToGridSize(radius + unit.radius))) {
+                        if (tool.isInCircleRange([unit.gridX, unit.gridY], [nextX, nextY], radiusGrid + unit.radiusGrid)) {
                             collisionObjects.push({collisionType: "unitHard", gridPos: [unit.gridX, unit.gridY ], with: unit});
                         }
-                        else if (tool.isInCircleRange([unit.gridX, unit.gridY], [nextX, nextY], tool.convertToGridSize(radius * 1.5 + unit.radius))) {
+                        else if (tool.isInCircleRange([unit.gridX, unit.gridY], [nextX, nextY], radiusGrid * 1.5 + unit.radiusGrid)) {
                             collisionObjects.push({collisionType: "unitSoft", gridPos: [unit.gridX, unit.gridY ], with: unit});
                         }
                     }
@@ -234,14 +234,14 @@
 
                 return direction;
             },
-            getCollisionObjects: function (grid, nextGrid, units, uid, radius) {
+            getCollisionObjects: function (grid, nextGrid, units, uid, radiusGrid) {
                 var nextX = nextGrid[0],
                     nextY = nextGrid[1],
                     collisionObjects = [],
                     range = 2;
 
-                collisionObjects = this._addCollisionUnits(nextX, nextY, radius, uid, units, range);
-                collisionObjects = collisionObjects.concat(this._addCollisionTerrains(grid, nextX, nextY, radius, range));
+                collisionObjects = this._addCollisionUnits(nextX, nextY, radiusGrid, uid, units, range);
+                collisionObjects = collisionObjects.concat(this._addCollisionTerrains(grid, nextX, nextY, radiusGrid, range));
 
                 this._setHighestPriorityCollisionObject(collisionObjects, nextGrid);
 

@@ -138,7 +138,7 @@ var combatAlgorithm = (function () {
             else {
                 targetGridPos = target.getAttackedPoint();
 
-                return tool.isInCircleRange(attackerGridPos, targetGridPos, distance + tool.convertToGridSize(target.radius));
+                return tool.isInCircleRange(attackerGridPos, targetGridPos, distance + target.radiusGrid);
             }
         },
         //现在先直接调用findDirection

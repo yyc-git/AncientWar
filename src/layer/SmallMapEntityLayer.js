@@ -97,7 +97,8 @@
             __drawUnit: function (sprite, fillStyle, graphics) {
                 var pixPos = tool.convertToSmallMapPix(sprite.gridX, sprite.gridY);
 
-                graphics.fillCircle(fillStyle, pixPos[0], pixPos[1], tool.convertToSmallMapGridSize(sprite.radius));
+                //半径放大两倍，从而在小地图上显示得更明显
+                graphics.fillCircle(fillStyle, pixPos[0], pixPos[1], sprite.smallMapRadius);
             }
         },
         Public: {

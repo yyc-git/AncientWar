@@ -15,6 +15,9 @@ var CharacterSprite = YYC.Class(EntitySprite, {
             this.direction = 4;
         }
 
+        this.radiusGrid = tool.convertToGridSize(this.radius);
+        this.smallMapRadius = tool.convertToSmallMapPixSize(this.radius * 2);
+
         this.P____steer = new Steer();
     },
     Private: {
@@ -128,11 +131,11 @@ var CharacterSprite = YYC.Class(EntitySprite, {
             var highestPriorityCollisionObject = this.P____steer.last_highestPriorityCollisionObject;
 
             if (this.P____steer.isTerrainCollision(highestPriorityCollisionObject)) {
-                distance = tool.convertToGridSize(this.radius);
+                distance = this.radiusGrid;
                 return !tool.isInPointToDiamondBoxEdgeDistance(current, highestPriorityCollisionObject.gridPos, distance);
             }
 
-            distance = tool.convertToGridSize(this.radius * 2.5 + highestPriorityCollisionObject.with.radius);
+            distance = this.radiusGrid * 2.5 + highestPriorityCollisionObject.with.radiusGrid;
 
             return !tool.isInCircleRange(current, highestPriorityCollisionObject.gridPos, distance);
         },
@@ -238,7 +241,7 @@ var CharacterSprite = YYC.Class(EntitySprite, {
             nextGrid = tool.convertToGrid(nextPos[0], nextPos[1]);
             units = this.getParent().getChildsByTag("unit");
 
-            return this.P____steer.getCollisionObjects(passableGridData, nextGrid, units, this.getUid(), this.radius);
+            return this.P____steer.getCollisionObjects(passableGridData, nextGrid, units, this.getUid(), this.radiusGrid);
         },
         ____findPath: function (passableGridData, current_floorGrid, dest_floorGrid) {
             var gridData = passableGridData;
@@ -302,6 +305,9 @@ var CharacterSprite = YYC.Class(EntitySprite, {
         }
     },
     Public: {
+        radiusGrid: null,   //半径（单位为方格大小）
+        smallMapRadius: null,   //半径（单位为小地图pix大小）
+
         changeToAnimNameInAnimPool: function (animNameInSprite) {
             return this.name + "_" + this.team + "_" + animNameInSprite;
         },
@@ -466,9 +472,9 @@ var CharacterSprite = YYC.Class(EntitySprite, {
         },
         isNearDestination: function (destination) {
             var current = [this.gridX, this.gridY],
-                range = this.radius * 10;
+                range = this.radiusGrid * 10;
 
-            return tool.isInCircleRange(destination, current, tool.convertToGridSize(range));
+            return tool.isInCircleRange(destination, current, range);
         },
         drawLifeBar: function (context) {
             var mapLayer = window.mapLayer;

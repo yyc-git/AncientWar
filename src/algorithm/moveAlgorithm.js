@@ -7,7 +7,7 @@
  */
 var moveAlgorithm = (function () {
     var DEFAULT_DIRECTIONS = 8;
-    var NEARDISTANCE = 20;
+    var NEARDISTANCE = 0.4; //单位为方格大小
 
     return{
         findDirection: function (from, to) {
@@ -253,10 +253,10 @@ var moveAlgorithm = (function () {
             return tool.isInCircleRange(from, destination, 0.3);
         },
         isInBuildableSpriteRange: function (start, destination, distance) {
-            return tool.isInPointToDiamondBoxEdgeDistance(start, destination, distance + tool.convertToGridSize(NEARDISTANCE));
+            return tool.isInPointToDiamondBoxEdgeDistance(start, destination, distance + NEARDISTANCE);
         },
         isNearBuildableSpriteDest: function (start, destination) {
-            return tool.isInPointToDiamondBoxEdgeDistance(start, destination, tool.convertToGridSize(NEARDISTANCE));
+            return tool.isInPointToDiamondBoxEdgeDistance(start, destination, NEARDISTANCE);
         },
         isReachDestGrid: function (now, destination) {
             return now[0] === destination[0] && now[1] === destination[1];
