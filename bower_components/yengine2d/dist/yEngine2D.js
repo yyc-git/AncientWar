@@ -2038,8 +2038,9 @@
             startTime = d.getTime();
 
 
-        var last_nodeNum = null,
-            jumpOutError = {jumpOut:true};
+//        var last_nodeNum = null,
+        var nodeNumArrForSolveInfiniteLoop = [],
+            jumpOutError = {jumpOut: true};
 
         /********************函数主体部分*************************/
         map_w = mapData.length;
@@ -2067,7 +2068,7 @@
             setH(targetNodeNum);
             setOpenList(startNodeNum); //把开始节点加入到openlist中
 
-            try{
+            try {
                 //就要开始那个令人发指的循环了，==！！A*算法主体
 
                 while (open_list.length != 0) {
@@ -2116,15 +2117,28 @@
                                 setG(tmp[i][4], bestNodeNum); //算g值，修改arr_map中[2]的值
                                 arr_map[tmp[i][4]] = tmp[i] = [arr_map[tmp[i][4]][0], bestNodeNum, arr_map[tmp[i][4]][2], arr_map[tmp[i][4]][3], arr_map[tmp[i][4]][4]]; //修改tmp和arr_map中父节点的值，并修改tmp中g值，是之和arr_map中对应节点的值统一
 
-                                //解决死循环的问题   yyc 2014-11-19
-                                if((tmp[i][4] === 8010 && last_nodeNum === 8011)
-                                    || tmp[i][4] === 8011 && last_nodeNum === 8010){
-                                    YE.log("解决死循环");
-                                    open_list = [];
-                                    throw jumpOutError; //跳出while循环
-                                }
-                                last_nodeNum = tmp[i][4];
 
+                                //解决死循环的问题   yyc 2014-11-19
+
+//                                if((tmp[i][4] === 8010 && last_nodeNum === 8011)
+//                                    || tmp[i][4] === 8011 && last_nodeNum === 8010){
+
+                                //目前发现出现死循环时的值可能为8010,8011,8012,7830,7831，这里将判断的范围扩大点
+                                if (tmp[i][4] <= 8015 && tmp[i][4] >= 8005) {
+                                    //如果这种情况出现多次，就认为是死循环bug
+                                    //目前暂时通过跳出while循环来解决，后面会重写A Star算法
+                                    if (nodeNumArrForSolveInfiniteLoop.length > 10) {
+                                        YE.log("解决死循环");
+                                        open_list = [];
+                                        throw jumpOutError; //跳出while循环
+                                    }
+
+                                    nodeNumArrForSolveInfiniteLoop.push(true);
+                                }
+//                                else {
+////                                    nodeNumArrForSolveInfiniteLoop = [];
+//                                }
+//                                last_nodeNum = tmp[i][4];
 
 
                                 setOpenList(tmp[i][4]); //存进openlist中
@@ -2143,10 +2157,10 @@
                     }
                 }
             }
-            catch(e){
-                if(e === jumpOutError){
+            catch (e) {
+                if (e === jumpOutError) {
                 }
-                else{
+                else {
                     throw e;
                 }
             }
