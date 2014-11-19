@@ -1,6 +1,6 @@
 {
     "name": "ancient-war",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "main": [
         "dist/yEngine2D.js",
         "dist/yEngine2D.min.js"

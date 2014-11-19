@@ -2855,6 +2855,7 @@
             getInstance: function () {
                 if (this._instance === null) {
                     this._instance = new this();
+                    this._instance.initWhenCreate();
                 }
                 return this._instance;
             }

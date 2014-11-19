@@ -11,8 +11,7 @@
         "src",
         "test",
         "node_modules",
-        "bower.json",
-        "gruntfile.js",
+        "Gruntfile.js",
         ".gitignore",
         "package.json",
         "README.md"

@@ -11,8 +11,7 @@
     "src",
     "test",
     "node_modules",
-    "bower.json",
-    "gruntfile.js",
+    "Gruntfile.js",
     ".gitignore",
     "package.json",
     "README.md"
@@ -42,9 +41,10 @@
   "_resolution": {
     "type": "version",
     "tag": "0.1.2",
-    "commit": "b3962631af433866b03e717ad771dbab8fbd39fd"
+    "commit": "c13ab130725944029ff1903f553a2312e6ac97f9"
   },
   "_source": "git://github.com/yyc-git/YEngine2D.git",
-  "_target": "*",
-  "_originalSource": "yengine2d"
+  "_target": "~0.1.2",
+  "_originalSource": "yengine2d",
+  "_direct": true
 }
