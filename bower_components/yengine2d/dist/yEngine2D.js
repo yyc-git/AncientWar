@@ -2035,9 +2035,11 @@
             arr_path = [],
             stopn = 0,
             tmp = [],
-
             startTime = d.getTime();
 
+
+        var last_nodeNum = null,
+            jumpOutError = {jumpOut:true};
 
         /********************函数主体部分*************************/
         map_w = mapData.length;
@@ -2064,70 +2066,90 @@
             arr_map[startNodeNum] = [arr_map[startNodeNum][0], startNodeNum, arr_map[startNodeNum][2], arr_map[startNodeNum][3], arr_map[startNodeNum][4]];//起始点的父节点为自己
             setH(targetNodeNum);
             setOpenList(startNodeNum); //把开始节点加入到openlist中
-            //就要开始那个令人发指的循环了，==！！A*算法主体
 
-            while (open_list.length != 0) {
-                var bestNodeNum = selectFmin(open_list);
-                stopn = 0;
-                open_list.shift();
-                setCloseList(bestNodeNum);
+            try{
+                //就要开始那个令人发指的循环了，==！！A*算法主体
 
-                if (bestNodeNum == targetNodeNum) {
-                    showPath(close_list, arr_path, arr_path_out);
-                    break;
-                }
-                var i = 0, j = 0;
-                //当目标为孤岛时的判断
-                var tmp0 = new Array();
-                var k;
-                tmp0 = setSuccessorNode(targetNodeNum, map_w);
-                for (j; j < 9; j++) {
-                    if (j == 8) {
-                        k = 0;
+                while (open_list.length != 0) {
+                    var bestNodeNum = selectFmin(open_list);
+                    stopn = 0;
+                    open_list.shift();
+                    setCloseList(bestNodeNum);
+
+                    if (bestNodeNum == targetNodeNum) {
+                        showPath(close_list, arr_path, arr_path_out);
                         break;
                     }
-                    if (tmp0[j][0] == 1) {
-                        k = 1;
-                        break;
+                    var i = 0, j = 0;
+                    //当目标为孤岛时的判断
+                    var tmp0 = new Array();
+                    var k;
+                    tmp0 = setSuccessorNode(targetNodeNum, map_w);
+                    for (j; j < 9; j++) {
+                        if (j == 8) {
+                            k = 0;
+                            break;
+                        }
+                        if (tmp0[j][0] == 1) {
+                            k = 1;
+                            break;
+                        }
                     }
-                }
-                //当目标为孤岛时的判断语句结束
-                if (k == 0) {
+                    //当目标为孤岛时的判断语句结束
+                    if (k == 0) {
 //                    showError("目标成孤岛!");
-                    time = getTime(startTime);
-                    return { path: [], time: time, info: "目标成孤岛"  };
-                }
-                else {
-                    tmp = setSuccessorNode(bestNodeNum, map_w);
-                    for (i; i < 8; i++) {
-                        if ((tmp[i][0] == 0) || (findInCloseList(tmp[i][4]))) continue;
+                        time = getTime(startTime);
+                        return { path: [], time: time, info: "目标成孤岛"  };
+                    }
+                    else {
+                        tmp = setSuccessorNode(bestNodeNum, map_w);
+                        for (i; i < 8; i++) {
+                            if ((tmp[i][0] == 0) || (findInCloseList(tmp[i][4]))) continue;
 
-                        if (findInOpenList(tmp[i][4]) == 1) {
-                            if (tmp[i][2] >= (arr_map[bestNodeNum][2] + cost(tmp[i], bestNodeNum))) {
+                            if (findInOpenList(tmp[i][4]) == 1) {
+                                if (tmp[i][2] >= (arr_map[bestNodeNum][2] + cost(tmp[i], bestNodeNum))) {
+                                    setG(tmp[i][4], bestNodeNum); //算g值，修改arr_map中[2]的值
+                                    arr_map[tmp[i][4]] = tmp[i] = [arr_map[tmp[i][4]][0], bestNodeNum, arr_map[tmp[i][4]][2], arr_map[tmp[i][4]][3], arr_map[tmp[i][4]][4]]; //修改tmp和arr_map中父节点的值，并修改tmp中g值，是之和arr_map中对应节点的值统一
+                                }
+                            }
+                            if (findInOpenList(tmp[i][4]) == 0) {
                                 setG(tmp[i][4], bestNodeNum); //算g值，修改arr_map中[2]的值
                                 arr_map[tmp[i][4]] = tmp[i] = [arr_map[tmp[i][4]][0], bestNodeNum, arr_map[tmp[i][4]][2], arr_map[tmp[i][4]][3], arr_map[tmp[i][4]][4]]; //修改tmp和arr_map中父节点的值，并修改tmp中g值，是之和arr_map中对应节点的值统一
+
+                                //解决死循环的问题   yyc 2014-11-19
+                                if((tmp[i][4] === 8010 && last_nodeNum === 8011)
+                                    || tmp[i][4] === 8011 && last_nodeNum === 8010){
+                                    YE.log("解决死循环");
+                                    open_list = [];
+                                    throw jumpOutError; //跳出while循环
+                                }
+                                last_nodeNum = tmp[i][4];
+
+
+
+                                setOpenList(tmp[i][4]); //存进openlist中
                             }
                         }
-                        if (findInOpenList(tmp[i][4]) == 0) {
-                            setG(tmp[i][4], bestNodeNum); //算g值，修改arr_map中[2]的值
-                            arr_map[tmp[i][4]] = tmp[i] = [arr_map[tmp[i][4]][0], bestNodeNum, arr_map[tmp[i][4]][2], arr_map[tmp[i][4]][3], arr_map[tmp[i][4]][4]]; //修改tmp和arr_map中父节点的值，并修改tmp中g值，是之和arr_map中对应节点的值统一
-                            setOpenList(tmp[i][4]); //存进openlist中
+                    }
 
-                        }
+                    stopn++;
+                    //if (stopn == map_w * map_w - 1) {     //2013.5.27修改
+                    if (stopn == map_w * map_w * 1000) {
+//                    showError("找不到路径!");
+                        time = getTime(startTime);
+                        return { path: [], time: time, info: "找不到路径"  };
+
+                        //                break;
                     }
                 }
-
-                stopn++;
-                //if (stopn == map_w * map_w - 1) {     //2013.5.27修改
-                if (stopn == map_w * map_w * 1000) {
-//                    showError("找不到路径!");
-                    time = getTime(startTime);
-                    return { path: [], time: time, info: "找不到路径"  };
-
-                    //                break;
+            }
+            catch(e){
+                if(e === jumpOutError){
+                }
+                else{
+                    throw e;
                 }
             }
-
 
             if (open_list.length == 0 && bestNodeNum != targetNodeNum) {
 //                showError("没有找到路径！！");   //对于那种找不到路径的点的处理
