@@ -9,7 +9,7 @@ describe("combatAlgorithm", function () {
     var algorithm = combatAlgorithm;
     var sandbox = null;
 
-    function buildFakeItem(uid, gridX, gridY, canAttack, isDead, radius) {
+    function buildFakeItem(uid, gridX, gridY, canAttack, isDead, radiusGrid) {
         return {
             getUid: function () {
                 return uid;
@@ -27,7 +27,7 @@ describe("combatAlgorithm", function () {
             },
             team: "red",
             canAttack: canAttack || false,
-            radius: radius || 0
+            radiusGrid: radiusGrid || 0
         }
     }
 
@@ -246,9 +246,6 @@ describe("combatAlgorithm", function () {
                     attacker = buildFakeAttacker(4, 5, 5, 5);
                 sandbox.stub(tool, "isBuildingSprite").returns(false);
                 sandbox.stub(tool, "isInCircleRange");
-                sandbox.stub(tool, "convertToGridSize", function (num) {
-                    return num;
-                });
 
                 algorithm.isInAttackRange(attacker, item);
 

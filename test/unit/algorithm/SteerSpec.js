@@ -35,14 +35,14 @@ describe("Steer", function () {
         });
 
         describe("根据精灵与其它单位坐标点之间的距离来判断是否碰撞并返回碰撞单位信息", function () {
-            function buildFakeUnit(uid, gridX, gridY) {
+            function buildFakeUnit(uid, gridX, gridY, radiusGrid) {
                 return {
                     getUid: function () {
                         return uid;
                     },
                     gridX: gridX,
                     gridY: gridY,
-                    radius: 20,
+                    radiusGrid: radiusGrid || 0.3,
                     isDead: function () {
                         return false;
                     }
@@ -51,26 +51,26 @@ describe("Steer", function () {
 
             it("记录碰撞类型、碰撞精灵的坐标和碰撞的精灵", function () {
                 var uid = 1,
-                    radius = 10;
+                    radiusGrid = 0.2;
                 nextGrid = [2.5, 2];
-                sandbox.stub(tool, "convertToGridSize",function (radius) {
-                    return radius / 20;
-                });
                 units = [
-                    buildFakeUnit(1),
-                    buildFakeUnit(2, 1, 1.2),
-                    buildFakeUnit(3, 2, 2),
-                    buildFakeUnit(4, 3, 2),
-                    buildFakeUnit(5, 2, 3)
+                    buildFakeUnit(1, 3.26, 2),
+                    buildFakeUnit(2, 1.91, 2),
+                    buildFakeUnit(3, 2.01, 2),
+                    buildFakeUnit(4, 2.9, 2),
+                    buildFakeUnit(5, 2.8, 2.4) ,
+                    buildFakeUnit(6, 1, 2)
                 ];
 
-                var objects = steer.getCollisionObjects(grid, nextGrid, units, uid, radius);
+
+                var objects = steer.getCollisionObjects(grid, nextGrid, units, uid, radiusGrid);
 
                 expect(objects).toEqual([
-                    { collisionType: 'unitSoft', gridPos: [ 1, 1.2 ], with: units[1] },
-                    { collisionType: 'unitHard', gridPos: [ 2, 2 ], with: units[2] },
-                    { collisionType: 'unitHard', gridPos: [ 3, 2 ], with: units[3]},
-                    { collisionType: 'unitHard', gridPos: [ 2, 3 ], with: units[4]}
+                    { collisionType: "unitSoft", gridPos: [ 1.91, 2 ], with: units[1] },
+                    { collisionType: "unitHard", gridPos: [ 2.01, 2 ], with: units[2] },
+                    { collisionType: "unitHard", gridPos: [ 2.9, 2 ], with: units[3]},
+                    { collisionType: "unitHard", gridPos: [ 2.8, 2.4 ], with: units[4]},
+                    { collisionType: "unitBlock", gridPos: [ 1, 2 ], with: units[5]}
                 ]);
             });
         });
@@ -85,13 +85,12 @@ describe("Steer", function () {
                 grid[2][3] = 1;
                 grid[1][2] = 1;
                 grid[3][2] = 1;
-                sandbox.stub(tool, "convertToGridSize").returns(0.2);
-                units = [];
+                sandbox.stub(steer, "_getMaxPointToDiamondBoxEdgeDistance").returns(0.2);
 
-                var objects = steer.getCollisionObjects(grid, nextGrid, units);
+                var objects = steer.getCollisionObjects(grid, nextGrid, []);
 
                 expect(objects).toEqual([
-                    { collisionType: 'gridHard', gridPos: [ 1, 2 ] }
+                    { collisionType: "gridHard", gridPos: [ 1, 2 ] }
                 ]);
             });
             it("如果精灵下一步会移动到地图外，则加入边界方块的碰撞，从而阻止精灵移动到地图外", function () {
@@ -101,7 +100,7 @@ describe("Steer", function () {
                 var objects = steer.getCollisionObjects(grid, nextGrid, units);
 
                 expect(objects).toEqual([
-                    { collisionType: 'gridHard', gridPos: [ -0.1, 0 ] }
+                    { collisionType: "gridHard", gridPos: [ -0.1, 0 ] }
                 ]);
             });
         });
@@ -122,8 +121,8 @@ describe("Steer", function () {
             describe("否则", function () {
                 it("如果有地形方块碰撞，则设置离精灵最近的碰撞方块为最高优先级", function () {
                     var nextGrid = [1, 1];
-                    var collObject1 = { collisionType: 'gridHard', gridPos: [ 1, 4 ] },
-                        collObject2 = { collisionType: 'gridHard', gridPos: [ 2, 2 ] };
+                    var collObject1 = { collisionType: "gridHard", gridPos: [ 1, 4 ] },
+                        collObject2 = { collisionType: "gridHard", gridPos: [ 2, 2 ] };
                     sandbox.stub(steer, "_addCollisionTerrains").returns([ collObject1, collObject2]);
 
                     var objects = steer.getCollisionObjects(grid, nextGrid, units);
@@ -132,9 +131,9 @@ describe("Steer", function () {
                 });
                 it("否则，则设置离精灵最近的碰撞单位为最高优先级", function () {
                     var nextGrid = [1, 1];
-                    var collObject1 = { collisionType: 'unitSoft', gridPos: [ 1, 4 ] },
-                        collObject2 = { collisionType: 'unitHard', gridPos: [ 1, 2 ] },
-                        collObject3 = { collisionType: 'unitHard', gridPos: [ 2, 2 ] };
+                    var collObject1 = { collisionType: "unitSoft", gridPos: [ 1, 4 ] },
+                        collObject2 = { collisionType: "unitHard", gridPos: [ 1, 2 ] },
+                        collObject3 = { collisionType: "unitHard", gridPos: [ 2, 2 ] };
                     sandbox.stub(steer, "_addCollisionUnits").returns([ collObject1, collObject2, collObject3]);
 
                     var objects = steer.getCollisionObjects(grid, nextGrid, units);
@@ -230,18 +229,28 @@ describe("Steer", function () {
         it("吸引力attraction会使实体倾向于往预定的nextStep的方向移动", function () {
             var nextStep = [2, 1];
             collisionObjects = [
-//                { collisionType: 'unitSoft', gridPos: [ 2, 1 ] }
-//                { collisionType: 'gridSoft', gridPos: [ 2, 3 ] }
+//                { collisionType: "unitSoft", gridPos: [ 2, 1 ] }
+//                { collisionType: "gridSoft", gridPos: [ 2, 3 ] }
             ];
             var direction = steer.calculateCollisionDirection(collisionObjects, nextStep, current);
 
             expect(direction).toEqual(7);
         });
+        it("不考虑block碰撞", function () {
+            var nextStep = [2, 1];
+            collisionObjects = [
+                { collisionType: "unitBlock", gridPos: [ 2, 1 ] }
+            ];
+            var direction = steer.calculateCollisionDirection(collisionObjects, nextStep, current);
+
+            expect(direction).toEqual(7);
+        });
+
         describe("测试与单位之间的碰撞（碰撞方向为碰撞单位坐标点到精灵坐标点的方向）", function () {
             it("测试hard碰撞", function () {
                 var nextStep = [3, 2];
                 collisionObjects = [
-                    { collisionType: 'unitHard', gridPos: [ 3.2, 2.8 ] }
+                    { collisionType: "unitHard", gridPos: [ 3.2, 2.8 ] }
                 ];
 
                 var direction = steer.calculateCollisionDirection(collisionObjects, nextStep, current);
@@ -251,7 +260,7 @@ describe("Steer", function () {
             it("soft碰撞测试1", function () {
                 var nextStep = [2, 1];
                 collisionObjects = [
-                    { collisionType: 'unitSoft', gridPos: [ 2, 1 ] }
+                    { collisionType: "unitSoft", gridPos: [ 2, 1 ] }
                 ];
                 var direction = steer.calculateCollisionDirection(collisionObjects, nextStep, current);
 
@@ -260,7 +269,7 @@ describe("Steer", function () {
             it("soft碰撞测试2", function () {
                 var nextStep = [1, 1];
                 collisionObjects = [
-                    { collisionType: 'unitSoft', gridPos: [ 1, 3 ] }
+                    { collisionType: "unitSoft", gridPos: [ 1, 3 ] }
                 ];
                 var direction = steer.calculateCollisionDirection(collisionObjects, nextStep, current);
 
@@ -269,9 +278,9 @@ describe("Steer", function () {
             it("测试soft和hard碰撞", function () {
                 var nextStep = [1, 3];
                 collisionObjects = [
-                    { collisionType: 'unitSoft', gridPos: [ 2, 1 ] } ,
-                    { collisionType: 'unitSoft', gridPos: [ 2, 0 ] } ,
-                    { collisionType: 'unitHard', gridPos: [ 3, 2 ] }
+                    { collisionType: "unitSoft", gridPos: [ 2, 1 ] } ,
+                    { collisionType: "unitSoft", gridPos: [ 2, 0 ] } ,
+                    { collisionType: "unitHard", gridPos: [ 3, 2 ] }
                 ];
                 var direction = steer.calculateCollisionDirection(collisionObjects, nextStep, current);
 
@@ -283,7 +292,7 @@ describe("Steer", function () {
             it("测试hard碰撞", function () {
                 var nextStep = [3, 2];
                 collisionObjects = [
-                    { collisionType: 'gridHard', gridPos: [ 3.2, 2.8 ] }
+                    { collisionType: "gridHard", gridPos: [ 3.2, 2.8 ] }
                 ];
 
                 var direction = steer.calculateCollisionDirection(collisionObjects, nextStep, current);
@@ -345,6 +354,230 @@ describe("Steer", function () {
             expect(steer.getMiddleDirection(1, 7, null, null)).toEqual(0);
         });
     });
+
+    describe("getCollisionObjectBlockGrids", function () {
+        function buildUnit(radiusGrid) {
+            return {
+                radiusGrid: radiusGrid
+            }
+        }
+
+//        it("获得碰撞单位挡住的路径方格", function () {
+//            var collisionObjects = [
+//                {collisionType: "unitHard", gridPos: [2, 2 ], with: buildUnit(0.1)},
+//                {collisionType: "unitSoft", gridPos: [0.8, 1.5 ], with: buildUnit(0.3)},
+//                {collisionType: "unitSoft", gridPos: [0.8, 3.5 ], with: buildUnit(0.1)},
+//                { collisionType: "gridHard", gridPos: [ 0, 4 ] }
+//            ];
+//            var path = [
+//                [1, 1],
+//                [1, 2],
+//                [1, 3],
+//                [1, 4]
+//            ];
+//
+//            var result = steer.getCollisionObjectBlockGrids(collisionObjects, path);
+//
+//            expect(result).toEqual([
+//                [1, 1],
+//                [1, 2]
+//            ]);
+//        });
+//        it("只判断前5个路径方格", function () {
+//
+//        });
+
+        it("获得碰撞单位挡住的方格", function () {
+            var collisionObjects = [
+                {collisionType: "unitHard", gridPos: [2.5, 2.6 ], with: buildUnit(0.1)},
+                {collisionType: "unitSoft", gridPos: [1.2, 1.5 ], with: buildUnit(0.3)},
+                { collisionType: "gridHard", gridPos: [ 0, 4 ] }
+            ];
+
+            var result = steer.getCollisionObjectBlockGrids(collisionObjects);
+
+            expect(result).toEqual([
+                [ 1, 2 ],
+                [ 2, 2 ],
+                [ 3, 2 ],
+                [ 1, 3 ],
+                [ 2, 3 ],
+                [ 3, 3 ],
+                [ 0, 0 ],
+                [ 1, 0 ],
+                [ 2, 0 ],
+                [ 0, 1 ],
+                [ 1, 1 ],
+                [ 2, 1 ],
+                [ 0, 2 ]
+            ]);
+        });
+    });
+
+    describe("_getBlockGrids", function () {
+        beforeEach(function () {
+        });
+        afterEach(function () {
+        });
+
+        it("获得单位封锁的方格数组", function () {
+            var gridPos = [2.5, 2.2];
+            var radiusGrid = 1;
+
+            var arr = steer._getBlockGrids(gridPos, radiusGrid);
+
+            expect(arr).toEqual([
+                [1, 1],
+                [2, 1],
+                [3, 1],
+                [1, 2],
+                [2, 2],
+                [3, 2],
+                [1, 3],
+                [2, 3],
+                [3, 3]
+            ]);
+        });
+    });
+
+    describe("recordCollision", function () {
+        beforeEach(function () {
+            steer.collisionRecordQueue = [];
+        });
+        afterEach(function () {
+        });
+
+        it("记录最近一段时间的寻路数据", function () {
+            sandbox.stub(Steer, "MAX_RECORDCOLLISIONCOUNT", 10);
+
+            steer.recordCollision([
+                [1, 1],
+                [2, 2]
+            ]);
+            steer.recordCollision([
+                [1, 1],
+                [2, 2]
+            ]);
+            steer.recordCollision([
+                [2, 2],
+                [2, 3]
+            ]);
+
+            expect(steer.collisionRecordQueue).toEqual([
+                [1, 1],
+                [1, 1],
+                [2, 2]
+            ]);
+        });
+        it("最多记录MAX_RECORDCOLLISIONCOUNT个数据，使用左进右出的顺序来管理", function () {
+            sandbox.stub(Steer, "MAX_RECORDCOLLISIONCOUNT", 2);
+
+            steer.recordCollision([
+                [1, 1],
+                [2, 2]
+            ]);
+            steer.recordCollision([
+                [1, 1],
+                [2, 2]
+            ]);
+            steer.recordCollision([
+                [2, 2],
+                [2, 3]
+            ]);
+
+            expect(steer.collisionRecordQueue).toEqual([
+                [2, 2],
+                [1, 1]
+            ]);
+        });
+    });
+
+    describe("isMoveCyclic", function () {
+        it("如果collisionRecordQueue个数达到了上限，且其中重复的路径数据达到了阈值，" +
+            "则判断为“原地打转”的情况，返回true", function () {
+            sandbox.stub(Steer, "MAX_RECORDCOLLISIONCOUNT", 4);
+            sandbox.stub(Steer, "THRESHOLD_RECORDCOLLISIONCOUNT", 2);
+            steer.recordCollision([
+                [1, 1]
+            ]);
+            steer.recordCollision([
+                [1, 1],
+                [2, 2]
+            ]);
+            steer.recordCollision([
+                [2, 2],
+                [2, 3]
+            ]);
+            steer.recordCollision([
+                [3, 3]
+            ]);
+
+            var result = steer.isMoveCyclic();
+
+            expect(result).toBeTruthy();
+        });
+
+        describe("否则返回false", function () {
+            it("collisionRecordQueue个数未达到上限，返回false", function () {
+                sandbox.stub(Steer, "MAX_RECORDCOLLISIONCOUNT", 2);
+                steer.recordCollision([
+                    [1, 1]
+                ]);
+
+                var result = steer.isMoveCyclic();
+
+                expect(result).toBeFalsy();
+            });
+            it("重复的路径数据未达到阈值，返回false", function () {
+                sandbox.stub(Steer, "MAX_RECORDCOLLISIONCOUNT", 4);
+                sandbox.stub(Steer, "THRESHOLD_RECORDCOLLISIONCOUNT", 2);
+                steer.recordCollision([
+                    [1, 1]
+                ]);
+                steer.recordCollision([
+                    [3, 4],
+                    [3, 5]
+                ]);
+                steer.recordCollision([
+                    [2, 2],
+                    [2, 3]
+                ]);
+                steer.recordCollision([
+                    [3, 3]
+                ]);
+
+                var result = steer.isMoveCyclic();
+
+                expect(result).toBeFalsy();
+            });
+        });
+    });
+
+    describe("isCollisionHappened", function () {
+        function buildCollisionObj(type) {
+            return {
+                collisionType: type
+            }
+        }
+
+        it("如果collisionType不为unitBlock的碰撞实体个数大于0，则返回true", function () {
+            expect(steer.isCollisionHappened([
+                buildCollisionObj("unitHard"),
+                buildCollisionObj("unitBlock")
+            ])).toBeTruthy();
+            expect(steer.isCollisionHappened([
+                buildCollisionObj("gridHard")
+            ])).toBeTruthy();
+        });
+        it("否则返回false", function () {
+            expect(steer.isCollisionHappened([
+                buildCollisionObj("unitBlock")
+            ])).toBeFalsy();
+            expect(steer.isCollisionHappened([
+            ])).toBeFalsy();
+        });
+    });
+
 
 //    describe("isNearDestinationAndColliding", function () {
 //        beforeEach(function () {

@@ -44,7 +44,6 @@ var CharacterSprite = YYC.Class(EntitySprite, {
             this.____move(moveData, this.____last_dest);
         },
         ____makePathReachable: function (passableGridData, dest) {
-//            this.____makeGridReachable(passableGridData, begin);
             this.____makeGridReachable(passableGridData, dest);
         },
         ____makeGridReachable: function (passableGridData, destination) {
@@ -101,7 +100,7 @@ var CharacterSprite = YYC.Class(EntitySprite, {
                 this.____path.shift();
             }
 
-            if(this.____path.length === 0){
+            if (this.____path.length === 0) {
                 YE.log("path数组中只有精灵当前所在方格");
                 return null;
             }
@@ -178,17 +177,12 @@ var CharacterSprite = YYC.Class(EntitySprite, {
                 nextGrid = null,
                 current = null,
                 self = this,
-                objects =  collisionObjects,
                 newNextPos = null;
 
             nextGrid = tool.convertToGrid(nextPos[0], nextPos[1]);
             current = [this.gridX, this.gridY];
 
-            collisionObjects = collisionObjects.filter(function(obj){
-                return obj.collisionType !== "unitBlock";
-            });
-
-            if (collisionObjects.length > 0) {
+            if (this.P____steer.isCollisionHappened(collisionObjects)) {
                 if (this.P____steer.highestPriorityCollisionObject &&
                     this.____isHighestPriorityCollisionObjectUnit() &&
                     this.____isHighestPriorityCollisionUnitMoving() &&
@@ -208,7 +202,7 @@ var CharacterSprite = YYC.Class(EntitySprite, {
                 }
 
                 if (this.____isMoveCyclic()) {
-                    this.____blockGrids = this.P____steer.getCollisionObjectBlockGrids(objects);
+                    this.____blockGrids = this.P____steer.getCollisionObjectBlockGrids(collisionObjects);
                     this.P____steer.collisionRecordArr = [];
                 }
             }
@@ -276,8 +270,7 @@ var CharacterSprite = YYC.Class(EntitySprite, {
 
             gridData = this.____getPassableGridDataForFindPath();
 
-            if (moveAlgorithm.isDestCanNotPass(dest_floorGrid, gridData)
-                || moveAlgorithm.isDestCanNotPass(current_floorGrid, gridData)) {
+            if (moveAlgorithm.isDestCanNotPass(dest_floorGrid, gridData)) {
                 gridData = this.____copyPassableGridData(gridData);
             }
 
@@ -291,11 +284,10 @@ var CharacterSprite = YYC.Class(EntitySprite, {
             }
 
             this.____makePathReachable(gridData, dest_floorGrid);
-            this.____makePathReachable(gridData, current_floorGrid);
 
             this.____isPrepareForFindNewPathWithUnit = false;
 
-            return YE.AStar.aCompute(gridData, current_floorGrid, dest_floorGrid).path;
+            return YE.AStar.aCompute(gridData, current_floorGrid, dest_floorGrid);
         },
         ____getPassableGridDataForFindPath: function () {
             var passableGridData = null;
@@ -312,6 +304,14 @@ var CharacterSprite = YYC.Class(EntitySprite, {
         },
         ____copyPassableGridData: function (passableGridData) {
             return  this.____isPrepareForFindNewPathWithUnit ? passableGridData : YE.Tool.extend.extendDeep(passableGridData);
+        },
+        ____recordCollision: function () {
+            if (this.P____steer.colliding && this.____path) {
+                this.P____steer.recordCollision(this.____path);
+            }
+        },
+        ____isMoveCyclic: function () {
+            return this.P____steer.isMoveCyclic();
         }
     },
     Protected: {
@@ -414,14 +414,6 @@ var CharacterSprite = YYC.Class(EntitySprite, {
         moveTo: function (destination) {
             this.runMoveToAction(destination);
         },
-        ____recordCollision: function () {
-            if (this.P____steer.colliding && this.____path) {
-                this.P____steer.recordCollision(this.____path);
-            }
-        },
-        ____isMoveCyclic: function () {
-            return this.P____steer.isMoveCyclic();
-        },
         moveToDest: function (destination) {
             var nextDirection = null,
                 nextPos = null,
@@ -481,7 +473,7 @@ var CharacterSprite = YYC.Class(EntitySprite, {
 
                 nextGrid = this.____getNextPathGrid(current_floorGrid);
 
-                if(nextGrid === null){
+                if (nextGrid === null) {
                     return;
                 }
 

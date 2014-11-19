@@ -24,7 +24,7 @@ describe("tool", function () {
                 gridHeight: 10,
                 mapGridWidth: 2,
                 mapGridHeight: 2
-            }) ;
+            });
             sandbox.stub(tool, "computeOnePixSize").returns(2);
         });
         afterEach(function () {
@@ -67,9 +67,22 @@ describe("tool", function () {
             sandbox.stub(config, "map", {
                 gridWidth: 10,
                 gridHeight: 20
-            }) ;
+            });
 
             expect(tool.convertToGridSize(10)).toEqual(10 * 2 / (10 + 20));
+        });
+    });
+
+    describe("convertToSmallMapPixSize", function () {
+        it("将大地图的pix大小转换小地图pix大小", function () {
+            var bigMapPixSize = 10;
+            sandbox.stub(config, "map", {
+                scale: 10
+            });
+
+            var result = tool.convertToSmallMapPixSize(bigMapPixSize);
+
+            expect(result).toEqual(1);
         });
     });
 
@@ -175,16 +188,16 @@ describe("tool", function () {
     describe("isInPointToDiamondBoxEdgeDistance，判断点到菱形方块的距离是否小于distance", function () {
         var distance = 0,
             point = null,
-            diamondBoxTopLeftVertex = null;
+            diamondBoxLeftUpVertex = null;
 
         function judge(point1, point2) {
-            expect(tool.isInPointToDiamondBoxEdgeDistance(point1, diamondBoxTopLeftVertex, distance)).toBeFalsy();
-            expect(tool.isInPointToDiamondBoxEdgeDistance(point2, diamondBoxTopLeftVertex, distance)).toBeTruthy();
+            expect(tool.isInPointToDiamondBoxEdgeDistance(point1, diamondBoxLeftUpVertex, distance)).toBeFalsy();
+            expect(tool.isInPointToDiamondBoxEdgeDistance(point2, diamondBoxLeftUpVertex, distance)).toBeTruthy();
         }
 
         beforeEach(function () {
             distance = 1;
-            diamondBoxTopLeftVertex = [2, 2];
+            diamondBoxLeftUpVertex = [2, 2];
         });
 
         it("点在菱形方块上方", function () {
@@ -226,8 +239,8 @@ describe("tool", function () {
         });
     });
 
-    describe("roundingNum", function(){
-        it("对数字进行四舍五入", function(){
+    describe("roundingNum", function () {
+        it("对数字进行四舍五入", function () {
             var num1 = 1.3,
                 num2 = 1.75;
 

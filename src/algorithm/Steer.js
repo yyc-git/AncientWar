@@ -6,15 +6,9 @@
  * 博客：http://www.cnblogs.com/chaogex/
  */
 (function () {
-    var DIRECTIONS = 8,
-        MAX_COLLISIONCOUNT = 5;
-
-    var MAX_RECORDCOLLISIONCOUNT = 10,
-        THRESHOLD_RECORDCOLLISIONCOUNT = 5;
-
     var Steer = YYC.Class({
         Init: function () {
-            this.collisionRecordArr = [];
+            this.collisionRecordQueue = [];
         },
         Private: {
             _addCollisionTerrains: function (grid, nextX, nextY, radiusGrid, range) {
@@ -69,7 +63,7 @@
                         else if (tool.isInCircleRange([unit.gridX, unit.gridY], [nextX, nextY], (radiusGrid * 1.5 + unit.radiusGrid))) {
                             collisionObjects.push({collisionType: "unitSoft", gridPos: [unit.gridX, unit.gridY ], with: unit});
                         }
-                        else if (tool.isInCircleRange([unit.gridX, unit.gridY], [nextX, nextY], (radiusGrid  + unit.radiusGrid) * 4)) {
+                        else if (tool.isInCircleRange([unit.gridX, unit.gridY], [nextX, nextY], (radiusGrid + unit.radiusGrid) * 4)) {
                             collisionObjects.push({collisionType: "unitBlock", gridPos: [unit.gridX, unit.gridY ], with: unit});
                         }
                     }
@@ -161,19 +155,50 @@
             _getMiddleDirectionUnderMoreThanFour: function (maxDirection, minDirection) {
                 var direction = 0;
 
-                direction = maxDirection + (DIRECTIONS + minDirection - maxDirection) / 2;
-                direction = direction >= DIRECTIONS ? direction - DIRECTIONS : direction;
+                direction = maxDirection + (Steer.DIRECTIONS + minDirection - maxDirection) / 2;
+                direction = direction >= Steer.DIRECTIONS ? direction - Steer.DIRECTIONS : direction;
 
                 return direction;
             },
             _getMiddleDirectionUnderLessThanFour: function (maxDirection, minDirection) {
                 return minDirection + (maxDirection - minDirection) / 2;
+            },
+            _isBlockUnit: function (obj) {
+                return this.isCollisionUnit(obj) || obj.collisionType === "unitBlock";
+            },
+            _getBlockGrids: function (gridPos, radiusGrid) {
+                var minX = null,
+                    maxX = null,
+                    minY = null,
+                    maxY = null,
+                    gridArr = [],
+                    i = 0,
+                    j = 0;
+
+                minX = Math.floor(gridPos[0] - radiusGrid);
+                maxX = Math.floor(gridPos[0] + radiusGrid);
+                minY = Math.floor(gridPos[1] - radiusGrid);
+                maxY = Math.floor(gridPos[1] + radiusGrid);
+
+                minX = minX < 0 ? 0 : minX;
+                maxX = maxX >= config.map.mapGridWidth ? config.map.mapGridWidth : maxX;
+                minY = minY < 0 ? 0 : minY;
+                maxY = maxX >= config.map.mapGridHeight ? config.map.mapGridHeight : maxY;
+
+                for (i = minY; i <= maxY; i++) {
+                    for (j = minX; j <= maxX; j++) {
+                        gridArr.push([j, i]);
+                    }
+                }
+
+
+                return gridArr;
             }
         },
         Public: {
             collisionCount: 0,
             colliding: false,
-            collisionRecordArr: null,
+            collisionRecordQueue: null,
             highestPriorityCollisionObject: null,        //记录当前与精灵碰撞的最高优先级的碰撞实体
             last_highestPriorityCollisionObject: null,  //记录上一次最高优先级的碰撞实体
 
@@ -222,9 +247,9 @@
                 collisionObjects.push({collisionType: "attraction", gridPos: nextStep});
 
                 collisionObjects.forEach(function (collObject) {
-//                    if(collObject.collisionType === "unitBlock"){
-//                        return;
-//                    }
+                    if (collObject.collisionType === "unitBlock") {
+                        return;
+                    }
 
                     switch (collObject.collisionType) {
                         case "unitHard":
@@ -233,10 +258,6 @@
                             break;
                         case "unitSoft":
                             forceMagnitude = 1;
-                            collisionDirection = self._findCollObjectUnitToSprite(collObject.gridPos, current);
-                            break;
-                        case "unitBlock":
-                            forceMagnitude = 0.5;
                             collisionDirection = self._findCollObjectUnitToSprite(collObject.gridPos, current);
                             break;
                         case "attraction":
@@ -286,32 +307,12 @@
                 }
             },
             isCollisionTooMuch: function () {
-                return this.collisionCount > MAX_COLLISIONCOUNT;
+                return this.collisionCount > Steer.MAX_COLLISIONCOUNT;
             },
             resetCollisionCount: function () {
                 this.collisionCount = 0;
             },
             getCollisionObjectBlockGrids: function (collisionObjects) {
-//                var blockGrids = [],
-//                    self = this,
-//                    unitObjects = null;
-//
-//                unitObjects = collisionObjects.filter(function (obj) {
-//                    return self.isCollisionUnit(obj);
-//                });
-//
-//                pathArr.slice(0, 4).forEach(function (pathGrid) {
-//                    unitObjects.forEach(function (unit) {
-//                        if (self._isBlock(unit.gridPos, unit.with.radiusGrid, pathGrid)) {
-//                            blockGrids.push(pathGrid);
-//                            return $break;
-//                        }
-//                    });
-//                });
-//
-//                return blockGrids;
-
-
                 var blockGrids = [],
                     self = this,
                     unitObjects = null,
@@ -321,112 +322,50 @@
                     return self._isBlockUnit(obj);
                 });
 
-
                 unitObjects.forEach(function (unit) {
                     //扩大单位半径范围，从而增加更多的阻挡方格，使精灵能更好地绕过阻挡的单位
                     blockGrids = blockGrids.concat(self._getBlockGrids(unit.gridPos, unit.with.radiusGrid + extendRange))
                 });
 
-                return blockGrids;
-
+                return YYC.Tool.array.getNoRepeatArr(blockGrids, function(a, b){
+                    return a[0] === b[0] && a[1] === b[1];
+                });
             },
-             _isBlockUnit:function(obj){
-                  return this.isCollisionUnit(obj) || obj.collisionType === "unitBlock";
-             },
-            //todo 移到yTool->array中
-            getNoRepeatArr: function (arr) {
-
-            },
-
-            getMaxRepeatEleNum: function (arr) {
-                var num = 1,
-                    numArr = [],
-                    i = 0,
-                    j = 0,
-                    len = 0,
-                    originEle = null,
-                    targetEle = null;
-
-                for (i = 0, len = arr.length; i < len; i++) {
-                    originEle = arr[i];
-
-                    for (j = i + 1; j < len; j++) {
-                        targetEle = arr[j];
-                        if (originEle[0] === targetEle[0] && originEle[1] === targetEle[1]) {
-                            num += 1;
-                        }
-                    }
-
-                    numArr.push(num);
-                    num = 1;
-                }
-
-                numArr.sort();
-
-                return numArr[numArr.length - 1];
-            },
-
             recordCollision: function (pathArr) {
                 var firstStep = pathArr[0];
 
-                if(!firstStep){
+                if (!firstStep) {
                     return;
                 }
 
-                if (this.collisionRecordArr.length < MAX_RECORDCOLLISIONCOUNT) {
-                    this.collisionRecordArr.push(firstStep);
+                if (this.collisionRecordQueue.length < Steer.MAX_RECORDCOLLISIONCOUNT) {
+                    this.collisionRecordQueue.push(firstStep);
                 }
-                else{
-                    this.collisionRecordArr.shift();
-                    this.collisionRecordArr.push(firstStep);
+                else {
+                    this.collisionRecordQueue.pop();
+                    this.collisionRecordQueue.unshift(firstStep);
                 }
             },
             isMoveCyclic: function () {
-                if (this.collisionRecordArr.length < MAX_RECORDCOLLISIONCOUNT) {
+                if (this.collisionRecordQueue.length < Steer.MAX_RECORDCOLLISIONCOUNT) {
                     return;
                 }
 
-                return this.getMaxRepeatEleNum(this.collisionRecordArr) >= THRESHOLD_RECORDCOLLISIONCOUNT;
+                return YYC.Tool.array.getMaxRepeatEleNum(this.collisionRecordQueue, function(a, b){
+                    return a[0] === b[0] && a[1] === b[1];
+                }) >= Steer.THRESHOLD_RECORDCOLLISIONCOUNT;
             },
-//            _isBlock: function (gridPos, radiusGrid, pathGrid) {
-////                return tool.isInPointToDiamondBoxEdgeDistance(gridPos, pathGrid, radiusGrid);
-//                var minX = null,
-//                    maxX = null,
-//                    minY = null,
-//                    maxY = null;
-//
-//
-//
-//
-//            }
-            _getBlockGrids: function (gridPos, radiusGrid) {
-                var minX = null,
-                    maxX = null,
-                    minY = null,
-                    maxY = null,
-                    gridArr = [],
-                    i = 0,
-                    j = 0;
-
-                minX = Math.floor(gridPos[0] - radiusGrid) ;
-                maxX = Math.floor(gridPos[0] + radiusGrid);
-                minY = Math.floor(gridPos[1] - radiusGrid);
-                maxY = Math.floor(gridPos[1] + radiusGrid);
-
-                minX = minX < 0 ? 0 : minX;
-                maxX = maxX >= config.map.mapGridWidth ? config.map.mapGridWidth : maxX;
-                minY= minY < 0 ? 0 : minY;
-                maxY = maxX >= config.map.mapGridHeight ? config.map.mapGridHeight : maxY;
-
-                   for(i = minY; i <= maxY; i++){
-                       for(j = minX; j <= maxX; j++){
-                           gridArr.push([j, i]);
-                       }
-                   }
-
-
-                return gridArr;
+            isCollisionHappened: function (collisionObjects) {
+                return collisionObjects.filter(function (obj) {
+                    return obj.collisionType !== "unitBlock";
+                }).length > 0;
             }
+        },
+        Static: {
+            DIRECTIONS: 8,
+            MAX_COLLISIONCOUNT: 5,
+            MAX_RECORDCOLLISIONCOUNT: 10,
+            THRESHOLD_RECORDCOLLISIONCOUNT: 5
         }
     });
 

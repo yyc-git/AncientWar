@@ -1715,6 +1715,54 @@
                 arr.push(ele);	//arr.push(ele1, ele2, ...);		可以添加多个
 
                 return arr;
+            },
+            getNoRepeatArr: function (arr, isEqual) {
+                var isEqual = isEqual || function (a, b) {
+                        return a === b;
+                    },
+                    resultArr = [];
+
+                arr.forEach(function (ele) {
+                    if (resultArr.contain(function (val) {
+                        return isEqual(val, ele);
+                    })) {
+                        return;
+                    }
+
+                    resultArr.push(ele);
+                });
+
+                return resultArr;
+            },
+            getMaxRepeatEleNum: function (arr, isEqual) {
+                var num = 1,
+                    numArr = [],
+                    i = 0,
+                    j = 0,
+                    len = arr.length,
+                    originEle = null,
+                    targetEle = null,
+                    isEqual = isEqual || function (a, b) {
+                        return a === b;
+                    };
+
+                for (i = 0; i < len; i++) {
+                    originEle = arr[i];
+
+                    for (j = i + 1; j < len; j++) {
+                        targetEle = arr[j];
+                        if (isEqual(originEle, targetEle)) {
+                            num += 1;
+                        }
+                    }
+
+                    numArr.push(num);
+                    num = 1;
+                }
+
+                numArr.sort();
+
+                return numArr[numArr.length - 1];
             }
         }
     }());
