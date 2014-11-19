@@ -73,21 +73,41 @@ var CharacterSprite = YYC.Class(EntitySprite, {
             return ms / 1000 >= maxTime;
         },
         ____waitAndPollingMove: function (destGrid) {
+            if (this.____isWaitingForFindPath()) {
+                if (this.____isWaitingMaxTime()) {
+                    this.____endWaitState();
+                    return;
+                }
+
+                this.____keepWait();
+                return;
+            }
+
+            this.____waitingForMove(destGrid);
+        },
+        ____isWaitingForFindPath: function () {
+            return this.____isWaitingForMove() && this.____last_nextPos === null && this.____last_nextDirection === null;
+        },
+        ____endWaitState: function () {
+            this.____isWaitingFlag = false;
+        },
+        ____keepWait: function () {
+            this.____isWaitingFlag = true;
+        },
+        ____waitingForMove: function (destGrid) {
             var collisionData = null;
 
             if (this.____canMove(this.____last_nextPos)) {
+                this.____endWaitState();
                 this.____continueLastMove();
 
                 return;
             }
 
             if (this.____isWaitingMaxTime()) {
+                this.____endWaitState();
                 collisionData = this.____handleCollision(this.____last_nextPos, this.____last_nextDirection,
                     this.____getCollisionObjects(this.____last_nextPos), destGrid);
-
-                if(collisionData === null){
-                    return;
-                }
 
                 this.____move(collisionData, this.____last_dest);
 
@@ -96,8 +116,25 @@ var CharacterSprite = YYC.Class(EntitySprite, {
 
             this.____keepWait();
         },
-        ____keepWait: function () {
-            this.____isMovingFlag = false;
+        ____waitWhenCannotFindPath: function (current, destination) {
+            var nextPos = null,
+                nextDirection = null;
+
+            nextPos = this.____getNextPos(current, destination);
+
+            if (this.____isCollisionToUnReachableDest(nextPos)) {
+                this.____waitForFindPath();
+                return;
+            }
+
+            nextDirection = moveAlgorithm.findAccurateDirection(current, destination);
+            this.____waitForMove(nextPos, nextDirection);
+        },
+        ____waitForFindPath: function () {
+            this.____wait(null, null);
+        },
+        ____waitForMove: function (nextPos, nextDirection) {
+            this.____wait(nextPos, nextDirection);
         },
         ____getNextPathGrid: function (now) {
             if (tool.isEqualGrid(now, this.____path[0])) {
@@ -116,19 +153,12 @@ var CharacterSprite = YYC.Class(EntitySprite, {
                 this.____isMovingFlag = false;
                 return;
             }
-            var nextPos = collisionData.nextPos,
-                nextDirection = moveAlgorithm.getDirectionRoundNumber(collisionData.nextDirection);
 
-            this.setPosition(nextPos[0], nextPos[1]);
-
+            this.setPosition(collisionData.nextPos[0], collisionData.nextPos[1]);
             this.runMoveAnim();
-
             this.direction = collisionData.nextDirection;
-
             this.____last_dest = dest_floorGrid;
-
             this.____isMovingFlag = true;
-            this.____isWaitingFlag = false;
 
             if (this.canAttack) {
                 this.____reloadWhenMoving();
@@ -192,7 +222,7 @@ var CharacterSprite = YYC.Class(EntitySprite, {
                     this.____isHighestPriorityCollisionUnitMoving() &&
                     this.____isHighestPriorityCollisionUnitToSameDest()
                     ) {
-                    this.____wait(nextPos, nextDirection);
+                    this.____waitForMove(nextPos, nextDirection);
                     return null;
                 }
 
@@ -201,8 +231,9 @@ var CharacterSprite = YYC.Class(EntitySprite, {
 
                 this.isCollisionMove = true;
 
-                if (moveAlgorithm.isDestCanNotPass(tool.convertToGrid(newNextPos))) {
-                    this.runGuardAction();
+                if (this.____isCollisionToUnReachableDest(newNextPos)) {
+                    this.____waitWhenCannotFindPath(current, destGrid);
+
                     return null;
                 }
 
@@ -213,7 +244,6 @@ var CharacterSprite = YYC.Class(EntitySprite, {
             }
             else {
                 this.P____steer.resetFlag();
-                this.____isWaitingFlag = false;
                 this.isCollisionMove = false;
                 newNextDirection = nextDirection;
                 newNextPos = nextPos;
@@ -224,6 +254,9 @@ var CharacterSprite = YYC.Class(EntitySprite, {
             this.____last_nextPos = newNextPos;
 
             return {nextDirection: newNextDirection, nextPos: newNextPos};
+        },
+        ____isCollisionToUnReachableDest: function (newNextPos) {
+            return moveAlgorithm.isDestCanNotPass(tool.convertToGrid(newNextPos));
         },
         ____isHighestPriorityCollisionObjectUnit: function () {
             return this.P____steer.isCollisionUnit(this.P____steer.highestPriorityCollisionObject);
@@ -246,10 +279,6 @@ var CharacterSprite = YYC.Class(EntitySprite, {
                 dest_floorGrid = tool.roundDownGrid(destGrid);
 
             collisionData = this.____handleCollision(nextPos, nextDirection, this.____getCollisionObjects(nextPos), destGrid);
-
-            if(collisionData === null){
-                return;
-            }
 
             /*!
              此处要设置isCollisionMove为true。
@@ -473,10 +502,7 @@ var CharacterSprite = YYC.Class(EntitySprite, {
                 }
 
                 if (!this.isFindPath()) {
-                    nextPos = this.____getNextPos(current, destination);
-                    nextDirection = moveAlgorithm.findAccurateDirection(current, destination);
-                    this.____wait(nextPos, nextDirection);
-
+                    this.____waitWhenCannotFindPath(current, destination);
                     return;
                 }
 
@@ -494,10 +520,6 @@ var CharacterSprite = YYC.Class(EntitySprite, {
             }
 
             collisionData = this.____handleCollision(nextPos, nextDirection, this.____getCollisionObjects(nextPos), destination);
-
-            if(collisionData === null){
-                return;
-            }
 
             this.____move(collisionData, dest_floorGrid);
         },
@@ -567,7 +589,7 @@ var CharacterSprite = YYC.Class(EntitySprite, {
         stopMove: function () {
             this.____waitingBeginTime = 0;
             this.____isMovingFlag = false;
-            this.____isWaitingFlag = false;
+            this.____endWaitState();
             this.____last_dest = null;
             this.isCollisionMove = false;
             this.____path = null;
