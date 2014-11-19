@@ -85,6 +85,10 @@ var CharacterSprite = YYC.Class(EntitySprite, {
                 collisionData = this.____handleCollision(this.____last_nextPos, this.____last_nextDirection,
                     this.____getCollisionObjects(this.____last_nextPos), destGrid);
 
+                if(collisionData === null){
+                    return;
+                }
+
                 this.____move(collisionData, this.____last_dest);
 
                 return;
@@ -199,6 +203,7 @@ var CharacterSprite = YYC.Class(EntitySprite, {
 
                 if (moveAlgorithm.isDestCanNotPass(tool.convertToGrid(newNextPos))) {
                     this.runGuardAction();
+                    return null;
                 }
 
                 if (this.____isMoveCyclic()) {
@@ -241,6 +246,10 @@ var CharacterSprite = YYC.Class(EntitySprite, {
                 dest_floorGrid = tool.roundDownGrid(destGrid);
 
             collisionData = this.____handleCollision(nextPos, nextDirection, this.____getCollisionObjects(nextPos), destGrid);
+
+            if(collisionData === null){
+                return;
+            }
 
             /*!
              此处要设置isCollisionMove为true。
@@ -485,6 +494,10 @@ var CharacterSprite = YYC.Class(EntitySprite, {
             }
 
             collisionData = this.____handleCollision(nextPos, nextDirection, this.____getCollisionObjects(nextPos), destination);
+
+            if(collisionData === null){
+                return;
+            }
 
             this.____move(collisionData, dest_floorGrid);
         },
