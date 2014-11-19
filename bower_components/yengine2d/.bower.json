@@ -1,6 +1,6 @@
 {
   "name": "yEngine2D",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "main": [
     "dist/yEngine2D.js",
     "dist/yEngine2D.min.js"
@@ -13,6 +13,7 @@
     "node_modules",
     "bower.json",
     "gruntfile.js",
+    ".gitignore",
     "package.json",
     "README.md"
   ],
@@ -37,11 +38,11 @@
   "devDependencies": {
     "jquery": "1.7.1"
   },
-  "_release": "0.1.1",
+  "_release": "0.1.2",
   "_resolution": {
     "type": "version",
-    "tag": "0.1.1",
-    "commit": "41a55fff7a5dd27b7949834076c7f64112517916"
+    "tag": "0.1.2",
+    "commit": "b3962631af433866b03e717ad771dbab8fbd39fd"
   },
   "_source": "git://github.com/yyc-git/YEngine2D.git",
   "_target": "*",

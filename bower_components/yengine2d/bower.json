@@ -1,6 +1,6 @@
 {
     "name": "yEngine2D",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "main": [
         "dist/yEngine2D.js",
         "dist/yEngine2D.min.js"
@@ -13,6 +13,7 @@
         "node_modules",
         "bower.json",
         "gruntfile.js",
+        ".gitignore",
         "package.json",
         "README.md"
     ],

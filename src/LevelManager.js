@@ -105,12 +105,11 @@
                 setTimeout(function () {
                     var animPool = AnimPool.getInstance();
 
-//                    animPool.initWithFile("anim_archer_json");
-//                    animPool.initWithFile("anim_arrow_json");
-//                    animPool.initWithFile("anim_farmer_json");
-//                    animPool.initWithFile("anim_buildingEffect_json");
+                    animPool.initWithFile("anim_archer_json");
+                    animPool.initWithFile("anim_arrow_json");
+                    animPool.initWithFile("anim_farmer_json");
+                    animPool.initWithFile("anim_buildingEffect_json");
 
-//
                     ui.showEnterGame();
                 }, 50);
             },

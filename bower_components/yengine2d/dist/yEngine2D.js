@@ -2,7 +2,7 @@
  yEngine2D
  2D HTML5 Game Engine
 
- version: 0.1.1
+ version: 0.1.2
  author: YYC
  email: 395976266@qq.com
  qq: 395976266
@@ -10,8 +10,8 @@
  homepage: 
  repository: https://github.com/yyc-git/YEngine2D
  license: MIT
- date: 2014-11-16
- */
+ date: 2014-11-19
+*/
 (function () {
     function _extend(destination, source) {
         var property = "";
@@ -363,8 +363,8 @@
 
     /*!
      扩展String对象
-     */
-    (function () {
+    */
+    (function(){
         String.prototype.contain = function (str) {
             return this.indexOf(str) >= 0
         };
@@ -381,7 +381,7 @@
     /*!
      扩展Array对象
      */
-    (function () {
+    (function(){
         global.$break = {};
 
         Array.prototype.forEach = function (fn, context) {
@@ -589,7 +589,7 @@
                                     success(eval("(" + xhr.responseText + ")"));
                                 }
                             }
-                            else if (_isSoundFile(dataType)) {
+                            else if(_isSoundFile(dataType)){
                                 if (success !== null) {//将json字符串转换为js对象
                                     success(xhr.response);
                                 }
@@ -659,7 +659,7 @@
 
     YE.$ = yeQuery;
 }());
-(function () {
+(function(){
     /*!
      私有成员前缀为“ye_entity_”
      为什么不将前缀设成“ye_”？
@@ -739,7 +739,7 @@
         }
     });
 }());
-(function () {
+(function(){
     YE.Node = YYC.AClass(YE.Entity, {
         Private: {
             ye_parent: null,
@@ -865,7 +865,7 @@
         }
     });
 }());
-(function () {
+(function(){
     YE.NodeContainer = YYC.AClass(YE.Node, {
         Init: function () {
             this.base();
@@ -1050,7 +1050,7 @@
         }
     });
 }());
-(function () {
+(function(){
     YE.ActionInstant = YYC.AClass(YE.Action, {
         Public: {
             isStop: function () {
@@ -1063,7 +1063,7 @@
         }
     });
 }());
-(function () {
+(function(){
     YE.ActionInterval = YYC.AClass(YE.Action, {
         Init: function () {
             this.base();
@@ -1346,7 +1346,7 @@
         }
     });
 }());
-(function () {
+(function(){
     YE.DelayTime = YYC.Class(YE.ActionInterval, {
         Init: function (delayTime) {
             this.base();
@@ -1388,7 +1388,7 @@
         }
     });
 }());
-(function () {
+(function(){
     YE.JumpBy = YYC.Class(YE.ActionInterval, {
         Init: function (duration, x, y, height) {
             this.base();
@@ -1546,7 +1546,7 @@
         }
     });
 }());
-(function () {
+(function(){
     YE.MoveBy = YYC.Class(YE.ActionInterval, {
         Init: function (duration, x, y) {
             this.base();
@@ -1628,7 +1628,7 @@
         }
     });
 }());
-(function () {
+(function(){
     YE.Place = YYC.Class(YE.ActionInstant, {
         Init: function (x, y) {
             this.base();
@@ -1671,7 +1671,7 @@
     });
 }());
 
-(function () {
+(function(){
     YE.Repeat = YYC.Class(YE.Control, {
         Init: function (action, times) {
             this.base();
@@ -1737,7 +1737,7 @@
         }
     });
 }());
-(function () {
+(function(){
     YE.RepeatCondition = YYC.Class(YE.Control, {
         Init: function (action, context, conditionFunc) {
             this.base();
@@ -1791,7 +1791,7 @@
         }
     });
 }());
-(function () {
+(function(){
     YE.RepeatForever = YYC.Class(YE.Control, {
         Init: function (action) {
             this.base();
@@ -1927,7 +1927,7 @@
         }
     });
 }());
-(function () {
+(function(){
     YE.Spawn = YYC.Class(YE.Control, {
         Init: function (actionArr) {
             this.base();
@@ -2189,8 +2189,7 @@
         }
     };
 }());
-
-(function () {
+(function(){
     YE.collision = (function () {
         //获得精灵的碰撞区域,
         function _getCollideRect(obj) {
@@ -2211,7 +2210,8 @@
                 var rect2 = _getCollideRect(rect2);
 
                 //如果碰撞，则返回true
-                if (rect1 && rect2 && !(rect1.x1 >= rect2.x2 || rect1.y1 >= rect2.y2 || rect1.x2 <= rect2.x1 || rect1.y2 <= rect2.y1)) {
+                if (rect1 && rect2 &&
+                    !(rect1.x1 >= rect2.x2 || rect1.y1 >= rect2.y2 || rect1.x2 <= rect2.x1 || rect1.y2 <= rect2.y1)) {
                     return true;
                 }
                 return false;
@@ -2287,8 +2287,6 @@
     });
 }());
 (function () {
-    var _instance = null;
-
     YE.AnimationCache = YYC.Class(YE.Entity, {
         Init: function () {
             this.base();
@@ -2400,11 +2398,13 @@
             }
         },
         Static: {
+            _instance: null,
+
             getInstance: function () {
-                if (_instance === null) {
-                    _instance = new this();
+                if (this._instance === null) {
+                    this._instance = new this();
                 }
-                return _instance;
+                return this._instance;
             }
         }
     });
@@ -2438,7 +2438,7 @@
         }
     });
 }());
-(function () {
+(function(){
     YE.AnimationFrameManager = YYC.Class(YE.Entity, {
         Init: function () {
             this.ye_animationFrame = YE.AnimationFrame.create();
@@ -2492,7 +2492,7 @@
         }
     });
 }());
-(function () {
+(function(){
     YE.AnimationManager = YYC.Class(YE.CollectionManager, {
         Init: function () {
             this.base();
@@ -2576,8 +2576,6 @@
 }());
 
 (function () {
-    var _instance = null;
-
     YE.FrameCache = YYC.Class(YE.Entity, {
         Init: function () {
             this.base();
@@ -2643,37 +2641,23 @@
             }
         },
         Static: {
+            _instance: null,
+
             getInstance: function () {
-                if (_instance === null) {
-                    _instance = new this();
+                if (this._instance === null) {
+                    this._instance = new this();
                 }
-                return _instance;
+                return this._instance;
             }
         }
     });
 }());
 (function () {
-    var _instance = null;
-
-    var GameState = {
-        NORMAL: 0,
-        PAUSE: 1,
-        END: 2
-    };
-
-    var LoopType = {
-        NONE: 0,
-        REQUESTANIMATIONFRAME: 1,
-        INTERVAL: 2
-    };
-
     YE.Director = YYC.Class(YE.Entity, {
         Init: function () {
             this.base();
         },
         Private: {
-            ye_STARTING_FPS: 60,
-
             ye_startTime: 0,
             ye_lastTime: 0,
 
@@ -2713,20 +2697,20 @@
                 this.ye_lastTime = time;
             },
             ye_updateFps: function (time) {
-                if (this.ye_loopType === LoopType.INTERVAL) {
+                if (this.ye_loopType === YE.Director.LoopType.INTERVAL) {
                     this.ye_fps = 1 / this.ye_loopInterval;
                     return;
                 }
 
                 if (this.ye_lastTime === 0) {
-                    this.ye_fps = this.ye_STARTING_FPS;
+                    this.ye_fps = YE.Director.STARTING_FPS;
                 }
                 else {
                     this.ye_fps = 1000 / (time - this.ye_lastTime);
                 }
             },
             ye_isToUseIntervalLoop: function () {
-                return this.ye_loopInterval !== 1 / this.ye_STARTING_FPS;
+                return this.ye_loopInterval !== 1 / YE.Director.STARTING_FPS;
             },
             ye_startLoop: function () {
                 var self = this,
@@ -2737,7 +2721,7 @@
                         self.ye_loopBody(self.ye_getTimeNow());
                     }, this.ye_loopInterval * 1000);
 
-                    this.ye_loopType = LoopType.INTERVAL;
+                    this.ye_loopType = YE.Director.LoopType.INTERVAL;
                 }
                 else {
                     this.ye_endLoop = false;
@@ -2757,7 +2741,7 @@
                         self.ye_loopId = window.requestNextAnimationFrame(mainLoop);
                     };
                     this.ye_loopId = window.requestNextAnimationFrame(mainLoop);
-                    this.ye_loopType = LoopType.REQUESTANIMATIONFRAME;
+                    this.ye_loopType = YE.Director.LoopType.REQUESTANIMATIONFRAME;
                 }
 
                 this.ye_isRequestAnimFrameLoopAdded = true;
@@ -2776,14 +2760,14 @@
             gameTime: 0,
 
             initWhenCreate: function () {
-                this.ye_loopInterval = 1 / this.ye_STARTING_FPS;
+                this.ye_loopInterval = 1 / YE.Director.STARTING_FPS;
             },
             runWithScene: function (scene) {
                 scene.init(this);
                 this.setCurrentScene(scene);
 
                 this.ye_startTime = this.ye_getTimeNow();
-                this.ye_gameState = GameState.NORMAL;
+                this.ye_gameState = YE.Director.GameState.NORMAL;
 
                 this.ye_startLoop();
             },
@@ -2803,18 +2787,18 @@
             },
             getPixPerFrame: function (speed) {
 //                if (YE.main.getConfig().isDebug) {
-                return speed / this.ye_STARTING_FPS;
+                return speed / YE.Director.STARTING_FPS;
 //                }
-
+//
 //                return speed / this.ye_fps;
             },
             end: function () {
                 this.ye_endNextLoop();
-                this.ye_gameState = GameState.END;
+                this.ye_gameState = YE.Director.GameState.END;
                 YE.Tool.asyn.clearAllTimer(this.ye_timerIndex);
             },
             pause: function () {
-                if (this.ye_gameState === GameState.PAUSE) {
+                if (this.ye_gameState === YE.Director.GameState.PAUSE) {
                     return YE.returnForTest;
                 }
 
@@ -2823,16 +2807,16 @@
 
                 this.ye_lastLoopInterval = this.ye_loopInterval;
                 this.ye_endNextLoop();
-                this.ye_gameState = GameState.PAUSE;
+                this.ye_gameState = YE.Director.GameState.PAUSE;
             },
             resume: function () {
-                if (this.ye_gameState !== GameState.PAUSE) {
+                if (this.ye_gameState !== YE.Director.GameState.PAUSE) {
                     return YE.returnForTest;
                 }
 
                 this.ye_loopInterval = this.ye_lastLoopInterval;
                 this.ye_restart();
-                this.ye_gameState = GameState.NORMAL;
+                this.ye_gameState = YE.Director.GameState.NORMAL;
             },
             /**
              * 设置主循环间隔时间
@@ -2843,7 +2827,7 @@
                 this.ye_restart();
             },
             resumeRequestAnimFrameLoop: function () {
-                this.ye_loopInterval = 1 / this.ye_STARTING_FPS;
+                this.ye_loopInterval = 1 / YE.Director.STARTING_FPS;
                 this.ye_restart();
             },
             /**
@@ -2852,33 +2836,32 @@
              */
             setTimerIndex: function (index) {
                 this.ye_timerIndex = index;
-            },
-
-            //*供测试使用
-            forTest_getGameState: function () {
-                return GameState;
-            },
-            forTest_getLoopType: function () {
-                return LoopType;
             }
         },
         Static: {
+            _instance: null,
+            STARTING_FPS: 60,
+            GameState: {
+                NORMAL: 0,
+                PAUSE: 1,
+                END: 2
+            },
+            LoopType: {
+                NONE: 0,
+                REQUESTANIMATIONFRAME: 1,
+                INTERVAL: 2
+            },
+
             getInstance: function () {
-                if (_instance === null) {
-                    _instance = new this();
-                    _instance.initWhenCreate();
+                if (this._instance === null) {
+                    this._instance = new this();
                 }
-                return _instance;
+                return this._instance;
             }
         }
     });
 }());
 (function () {
-    var State = {
-        NORMAL: 0,
-        CHANGE: 1
-    };
-
     YE.Layer = YYC.AClass(YE.NodeContainer, {
         Init: function (id, position) {
             this.base();
@@ -2891,10 +2874,10 @@
             }
 
             if (this.isChange()) {
-                this.ye___state = State.CHANGE;
+                this.ye___state = YE.Layer.State.CHANGE;
             }
             else {
-                this.ye___state = State.NORMAL;
+                this.ye___state = YE.Layer.State.NORMAL;
             }
         },
         Private: {
@@ -2909,10 +2892,10 @@
                 this.ye___context = this.ye___canvas.getContext("2d");
             },
             ye___isChange: function () {
-                return this.ye___state === State.CHANGE;
+                return this.ye___state === YE.Layer.State.CHANGE;
             },
             ye___isNormal: function () {
-                return this.ye___state === State.NORMAL;
+                return this.ye___state === YE.Layer.State.NORMAL;
             },
             ye___clearCanvas: function () {
                 var canvasData = this.getCanvasData();
@@ -2946,10 +2929,10 @@
         },
         Public: {
             setStateNormal: function () {
-                this.ye___state = State.NORMAL;
+                this.ye___state = YE.Layer.State.NORMAL;
             },
             setStateChange: function () {
-                this.ye___state = State.CHANGE;
+                this.ye___state = YE.Layer.State.CHANGE;
             },
             setZIndex: function (zIndex) {
                 this.ye___canvas.style.zIndex = zIndex;
@@ -3048,15 +3031,14 @@
                 draw: function (context) {
                     this.iterate("draw", [context || this.getContext()]);
                 }
-            },
-
-            //*供测试使用
-
-            forTest_getState: function () {
-                return State;
             }
         },
         Static: {
+            State: {
+                NORMAL: 0,
+                CHANGE: 1
+            },
+
             create: function (id, position) {
                 var T = YYC.Class(YE.Layer, {
                     Init: function () {
@@ -3482,7 +3464,7 @@
         }
     });
 }());
-(function () {
+(function(){
     YE.Event = {
         //事件枚举值
         KEY_DOWN: 0,
@@ -3530,10 +3512,10 @@
     };
 }());
 (function () {
-    var _keyListeners = {};
-
     YE.EventManager = {
-        _getEventType: function (event) {
+        ye_keyListeners:{},
+
+        ye_getEventType: function (event) {
             var eventType = "",
                 e = YE.Event;
 
@@ -3578,7 +3560,7 @@
             var eventType = "",
                 _handler = null;
 
-            eventType = this._getEventType(event);
+            eventType = this.ye_getEventType(event);
 
             if (handlerContext) {
                 _handler = YE.Tool.event.bindEvent(handlerContext, handler);
@@ -3591,36 +3573,36 @@
             this._registerEvent(eventType, _handler, eventContext || window);
         },
         _registerEvent: function (eventType, handler, eventContext) {
-            if (_keyListeners[eventType] === undefined) {
-                _keyListeners[eventType] = [
+            if (this.ye_keyListeners[eventType] === undefined) {
+                this.ye_keyListeners[eventType] = [
                     [handler, eventContext]
                 ];
             }
             else {
-                _keyListeners[eventType].push([handler, eventContext]);
+                this.ye_keyListeners[eventType].push([handler, eventContext]);
             }
         },
         removeListener: function (event) {
             var eventType = "";
 
-            eventType = this._getEventType(event);
+            eventType = this.ye_getEventType(event);
 
-            if (_keyListeners[eventType]) {
-                _keyListeners[eventType].forEach(function (e, i) {
+            if (this.ye_keyListeners[eventType]) {
+                this.ye_keyListeners[eventType].forEach(function (e, i) {
                     YE.Tool.event.removeEvent(e[1], eventType, e[0]);
                 });
-                _keyListeners[eventType] = undefined;
+                this.ye_keyListeners[eventType] = undefined;
             }
         },
         removeAllListener: function () {
             var eventType = null;
 
-            for (eventType in _keyListeners) {
-                _keyListeners[eventType].forEach(function (e, i) {
+            for (eventType in this.ye_keyListeners) {
+                this.ye_keyListeners[eventType].forEach(function (e, i) {
                     YE.Tool.event.removeEvent(e[1], eventType, e[0]);
                 });
             }
-            _keyListeners = {};
+            this.ye_keyListeners = {};
         }
     };
 }());
@@ -3629,60 +3611,10 @@
     //todo 增加cache机制
     //todo 增强浏览器兼容性
 
-    var AudioType = {
-            NONE: 0,
-            WEBAUDIO: 1,
-            HTML5AUDIO: 2
-        },
-        PlayState = {
-            NONE: 0,
-            PLAYING: 1,
-            END: 2
-        };
-    var _audioType = null,
-        _ctx = null,
-        _audioObj = null;
-    var AudioBase = null,
-        WebAudio = null,
-        Html5Audio = null;
-
-    _audioDetect();
-
-    function _audioDetect() {
-        try {
-            var contextClass = window.AudioContext ||
-                window.webkitAudioContext ||
-                window.mozAudioContext ||
-                window.oAudioContext ||
-                window.msAudioContext;
-            if (contextClass) {
-                _ctx = new contextClass();
-                _audioType = AudioType.WEBAUDIO;
-            }
-            else {
-                _html5AudioDetect();
-            }
-        }
-        catch (e) {
-            _html5AudioDetect();
-        }
-    }
-
-    function _html5AudioDetect() {
-        if (typeof Audio !== "undefined") {
-            try {
-                new Audio();
-                _audioType = AudioType.HTML5AUDIO;
-            }
-            catch (e) {
-                _audioType = AudioType.NONE;
-            }
-        }
-        else {
-            _audioType = AudioType.HTML5AUDIO;
-        }
-    }
-
+    //内部类变量不作为SoundManager的静态成员，因为内部类变量不是设计为全局共享的
+    var _AudioBase = null,
+        _WebAudio = null,
+        _Html5Audio = null;
 
     var SoundManager = YYC.Class({
         Init: function (config) {
@@ -3693,14 +3625,14 @@
         },
         Public: {
             initWhenCreate: function () {
-                switch (_audioType) {
-                    case AudioType.WEBAUDIO:
-                        _audioObj = WebAudio.create(this.ye_config);
+                switch (SoundManager._audioType) {
+                    case SoundManager.AudioType.WEBAUDIO:
+                        SoundManager._audioObj = _WebAudio.create(this.ye_config);
                         break;
-                    case AudioType.HTML5AUDIO:
-                        _audioObj = Html5Audio.create(this.ye_config);
+                    case SoundManager.AudioType.HTML5AUDIO:
+                        SoundManager._audioObj = _Html5Audio.create(this.ye_config);
                         break;
-                    case AudioType.NONE:
+                    case SoundManager.AudioType.NONE:
                         YE.log("浏览器不支持Web Audio和Html5 Audio");
                         return YE.returnForTest;
                         break;
@@ -3709,39 +3641,74 @@
                         break;
                 }
 
-                _audioObj.load();
+                SoundManager._audioObj.load();
             },
             play: function () {
-                _audioObj.play();
+                SoundManager._audioObj.play();
             },
             getPlayState: function () {
-                return _audioObj.getPlayState();
+                return SoundManager._audioObj.getPlayState();
             },
 
 
-            forTest_setAudioObj: function (obj) {
-                _audioObj = obj;
-            },
-            forTest_setAudioType: function (type) {
-                _audioType = type;
-            },
-            forTest_getAudioTypeEnum: function () {
-                return AudioType;
-            },
-            forTest_getPlayStateEnum: function () {
-                return PlayState;
-            },
             forTest_getAudioBase: function () {
-                return AudioBase;
+                return _AudioBase;
             },
             forTest_getWebAudio: function () {
-                return WebAudio;
+                return _WebAudio;
             },
             forTest_getHtml5Audio: function () {
-                return Html5Audio;
+                return _Html5Audio;
             }
         },
         Static: {
+            _audioType: null,
+            _ctx: null,
+            _audioObj: null,
+            AudioType: {
+                NONE: 0,
+                WEBAUDIO: 1,
+                HTML5AUDIO: 2
+            },
+            PlayState: {
+                NONE: 0,
+                PLAYING: 1,
+                END: 2
+            },
+
+            audioDetect: function () {
+                try {
+                    var contextClass = window.AudioContext ||
+                        window.webkitAudioContext ||
+                        window.mozAudioContext ||
+                        window.oAudioContext ||
+                        window.msAudioContext;
+                    if (contextClass) {
+                        this._ctx = new contextClass();
+                        this._audioType = this.AudioType.WEBAUDIO;
+                    }
+                    else {
+                        this._html5AudioDetect();
+                    }
+                }
+                catch (e) {
+                    this._html5AudioDetect();
+                }
+            },
+            _html5AudioDetect: function () {
+                if (typeof Audio !== "undefined") {
+                    try {
+                        new Audio();
+                        this._audioType = this.AudioType.HTML5AUDIO;
+                    }
+                    catch (e) {
+                        this._audioType = this.AudioType.NONE;
+                    }
+                }
+                else {
+                    this._audioType = this.AudioType.HTML5AUDIO;
+                }
+            },
             create: function (config) {
                 var manager = new this(config);
 
@@ -3752,8 +3719,10 @@
         }
     });
 
+    SoundManager.audioDetect();
+
     (function () {
-        AudioBase = YYC.AClass({
+        _AudioBase = YYC.AClass({
             Private: {
                 ye_getCanPlayUrl: function () {
                     var self = this,
@@ -3835,7 +3804,7 @@
             }
         });
 
-        WebAudio = YYC.Class(AudioBase, {
+        _WebAudio = YYC.Class(_AudioBase, {
             Init: function (config) {
                 this.ye__config = config;
 
@@ -3863,15 +3832,15 @@
                         },
                         error: function () {
                             YE.log("使用Web Audio加载失败！尝试使用Html5 Audio加载");
-                            _audioObj = Html5Audio.create(self.ye__config);
-                            _audioObj.load();
+                            SoundManager._audioObj = _Html5Audio.create(self.ye__config);
+                            SoundManager._audioObj.load();
                         }
                     });
                 },
                 ye__decodeAudioData: function (arraybuffer, obj) {
                     var self = this;
 
-                    _ctx.decodeAudioData(
+                    SoundManager._ctx.decodeAudioData(
                         arraybuffer,
                         function (buffer) {
                             if (buffer) {
@@ -3889,19 +3858,19 @@
                 initWhenCreate: function () {
                     this.base();
 
-                    this.ye__playState = PlayState.NONE;
+                    this.ye__playState = SoundManager.PlayState.NONE;
                 },
                 load: function () {
                     this.ye__loadBuffer(this, this.ye_P_url);
                 },
                 play: function () {
-                    var source = _ctx.createBufferSource(),
+                    var source = SoundManager._ctx.createBufferSource(),
                         self = this;
 
                     source.buffer = this.ye__buffer;
-                    source.connect(_ctx.destination);
+                    source.connect(SoundManager._ctx.destination);
                     source.start(0);
-                    this.ye__playState = PlayState.PLAYING;
+                    this.ye__playState = SoundManager.PlayState.PLAYING;
 
                     /*!
                      有问题！线程阻塞时可能会不触发onended！
@@ -3911,16 +3880,11 @@
                      };*/
 
                     setTimeout(function () {
-                        self.ye__playState = PlayState.END;
+                        self.ye__playState = SoundManager.PlayState.END;
                     }, this.ye__buffer.duration * 1000);
                 },
                 getPlayState: function () {
                     return this.ye__playState;
-                },
-
-
-                forTest_setAudioContext: function (ctx) {
-                    _ctx = ctx;
                 }
             },
             Static: {
@@ -3934,7 +3898,7 @@
             }
         });
 
-        Html5Audio = YYC.Class(AudioBase, {
+        _Html5Audio = YYC.Class(_AudioBase, {
             Init: function (config) {
                 this.ye_P_urlArr = config.urlArr;
                 this.ye__onLoad = config.onLoad;
@@ -3996,13 +3960,13 @@
                     var playState = 0;
 
                     if (this.ye__audio.ended) {
-                        playState = PlayState.END;
+                        playState = SoundManager.PlayState.END;
                     }
                     else if (this.ye__audio.currentTime > 0) {
-                        playState = PlayState.PLAYING;
+                        playState = SoundManager.PlayState.PLAYING;
                     }
                     else {
-                        playState = PlayState.NONE;
+                        playState = SoundManager.PlayState.NONE;
                     }
 
                     return playState;
@@ -4026,8 +3990,6 @@
 
 
 (function () {
-    var _instance = null;
-
     YE.ImgLoader = YYC.Class(YE.Loader, {
         Init: function () {
             this.base();
@@ -4064,18 +4026,18 @@
             }
         },
         Static: {
+            _instance: null,
+
             getInstance: function () {
-                if (_instance === null) {
-                    _instance = new this();
+                if (this._instance === null) {
+                    this._instance = new this();
                 }
-                return _instance;
+                return this._instance;
             }
         }
     });
 }());
 (function () {
-    var _instance = null;
-
     YE.JsonLoader = YYC.Class(YE.Loader, {
         Init: function () {
             this.base();
@@ -4105,18 +4067,18 @@
             }
         },
         Static: {
+            _instance: null,
+
             getInstance: function () {
-                if (_instance === null) {
-                    _instance = new this();
+                if (this._instance === null) {
+                    this._instance = new this();
                 }
-                return _instance;
+                return this._instance;
             }
         }
     });
 }());
 (function () {
-    var _instance = null;
-
     YE.LoaderManager = YYC.Class(YE.Entity, {
         Init: function () {
             this.base();
@@ -4189,7 +4151,7 @@
             },
             onResError: function (path, err) {
                 YE.log("加载" + path + "资源失败");
-                if (err) {
+                if(err){
                     YE.log(err);
                 }
             },
@@ -4198,18 +4160,18 @@
             onload: undefined
         },
         Static: {
+            _instance: null,
+
             getInstance: function () {
-                if (_instance === null) {
-                    _instance = new this();
+                if (this._instance === null) {
+                    this._instance = new this();
                 }
-                return _instance;
+                return this._instance;
             }
         }
     });
 }());
 (function () {
-    var _instance = null;
-
     YE.SoundLoader = YYC.Class(YE.Loader, {
         Init: function () {
             this.base();
@@ -4232,18 +4194,18 @@
             }
         },
         Static: {
+            _instance: null,
+
             getInstance: function () {
-                if (_instance === null) {
-                    _instance = new this();
+                if (this._instance === null) {
+                    this._instance = new this();
                 }
-                return _instance;
+                return this._instance;
             }
         }
     });
 }());
 (function () {
-    var _instance = null;
-
     YE.SoundManager = YYC.Class(YE.Entity, {
         Init: function () {
             this.base();
@@ -4276,11 +4238,13 @@
             }
         },
         Static: {
+            _instance: null,
+
             getInstance: function () {
-                if (_instance === null) {
-                    _instance = new this();
+                if (this._instance === null) {
+                    this._instance = new this();
                 }
-                return _instance;
+                return this._instance;
             }
         }
     });
@@ -5428,7 +5392,7 @@
                             tags.forEach(function (tag) {
                                 childTag.forEach(function (t) {
                                     if (t === tag) {
-                                        func && func(child);
+                                        func&&func(child);
                                         throw breakOuter;
                                     }
                                 });

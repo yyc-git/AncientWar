@@ -11,7 +11,7 @@
             $("#enterGame").hide();
             $("#loadingMessage").show();
             $("#loadingMessage").html(msg);
-            $("#systemInfo").hide();
+            $("#systemInfo").html("");
         },
         showLoadErrorMessage: function (msg) {
             $("#loadError").show();
@@ -198,9 +198,8 @@
 
                 onclick: function (e) {
                     ui.showDialogue("<p style='margin-bottom: 50px;'>古代战争 v"
-                        + config.version
-                        + "</p><p>作者：YYC</p><p>邮箱：395976266@qq.com</p>"
-                        + "<p>博客：<a href='http://www.cnblogs.com/chaogex/' target='_blank'>码农终结者</a></p>");
+                        + config.version + "</p>"
+                        + config.authorInfo);
                 },
 
                 width: 200,

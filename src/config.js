@@ -6,8 +6,17 @@
  * 博客：http://www.cnblogs.com/chaogex/
  */
 var config = {
-    version: "0.1.0",
+    version: "0.2.0",
+    authorInfo: "<p>作者：YYC</p>"
+        + "<p>邮箱：395976266@qq.com</p>"
+        + "<p>博客：<a style='color:white;' href='http://www.cnblogs.com/chaogex/' target='_blank'>码农终结者</a></p>"
+        + "<p>GitHub:<a style='color:white;' href='https://github.com/yyc-git' target='_blank'>YYC</a></p>",
+    versionHistory: "<br/><p>版本历史：</p><dl style='margin-top:0px;'><dt>v0.1</dt><dd>发布第1版</dd>"
+        + "<dt>v0.2</dt><dd>修复bug</dd><dd>优化寻路</dd>"
+        + "</dl>",
+
     returnFlag: "returnFlag",
+
     map: {
         //*大地图
 
@@ -76,7 +85,7 @@ var config = {
             }
         },
         base: {
-            cName:"基地",
+            cName: "基地",
             width: 170,
             height: 135,
             baseSize: 100,
@@ -100,7 +109,7 @@ var config = {
             sight: 12
         },
         shootingRange: {
-            cName:"射击场",
+            cName: "射击场",
             width: 170,
             height: 135,
             baseSize: 100,
@@ -125,7 +134,7 @@ var config = {
             build_speed: 0.1
         },
         tower: {
-            cName:"箭塔",
+            cName: "箭塔",
             width: 60,
             height: 100,
             baseSize: 33,
@@ -149,7 +158,7 @@ var config = {
             build_speed: 0.1
         },
         farmer: {
-            cName:"农民",
+            cName: "农民",
             hitPoints: 50,
             radius: 10,
             speed: 60,
@@ -165,7 +174,7 @@ var config = {
             cost: 10
         },
         archer: {
-            cName:"弓箭手",
+            cName: "弓箭手",
             hitPoints: 60,
             radius: 12,
             speed: 50,

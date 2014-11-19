@@ -11,8 +11,8 @@
         "node_modules",
         "bower_components",
         "test",
-        "bower.json",
-        "gruntfile.js",
+        ".gitignore",
+        "Gruntfile.js",
         "package.json",
         "README.md"
     ],

@@ -1,6 +1,6 @@
 {
     "name": "yyctoolbox",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "homepage": "https://github.com/yyc-git/YYCToolBox",
     "authors": {
         "name": "YYC",
@@ -9,9 +9,22 @@
         "blog": "http://www.cnblogs.com/chaogex/"
     },
     "description": "ToolBox of YYC",
+    "ignore": [
+        "bower_components",
+        "test",
+        "node_modules",
+        "bower.json",
+        "gruntfile.js",
+        "package.json",
+        "README.md"
+    ],
     "keywords": [
         "ToolBox",
         "YYC"
     ],
-    "license": "MIT"
+    "license": "MIT",
+    "devDependencies": {
+        "jquery": "~2.1.1",
+        "yoop": "~1.1.0"
+    }
 }
