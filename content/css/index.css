@@ -15,7 +15,7 @@ html, body, p {
 }
 
 .index {
-    background-image: url(../image/interface/index.png);
+    background-image: url(../image/interface/index.jpg);
     background-repeat: no-repeat;
     background-size: 800px 600px;
     width: 800px;
@@ -73,7 +73,7 @@ html, body, p {
 
 .loading {
     display: none;
-    background-image: url(../image/interface/loading.png);
+    background-image: url(../image/interface/loading.jpg);
     background-repeat: no-repeat;
     background-size: 800px 600px;
     width: 800px;
@@ -204,7 +204,7 @@ html, body, p {
 
 .gameArea #menu {
     display: none;
-    background-image: url(../image/interface/menuBackground.png);
+    background-image: url(../image/interface/menuBackground.jpg);
     background-repeat: no-repeat;
     background-size: 300px 300px;
     position: absolute;

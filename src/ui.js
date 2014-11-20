@@ -30,6 +30,7 @@
             $('#gameArea').hide();
             $('#index').show();
             $("#systemInfo").hide();
+            ui.showUserInfo();
         },
         showLoading: function () {
             $('#gameArea').hide();
@@ -87,7 +88,11 @@
             $("#moreInfo").append($("<p>").html("有" + num + "个单位正在建造"));
         },
         showSystemInfo: function (info) {
+            $("#systemInfo").show();
             $("#systemInfo").html(info);
+        },
+        showUserInfo:function(){
+            this.showSystemInfo(config.authorInfo + config.bowerSupport + config.versionHistory);
         },
         initEvent: function () {
             var self = this;
