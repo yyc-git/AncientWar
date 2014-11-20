@@ -10,7 +10,9 @@ var config = {
     authorInfo: "<p>作者：YYC</p>"
         + "<p>邮箱：395976266@qq.com</p>"
         + "<p>博客：<a style='color:white;' href='http://www.cnblogs.com/chaogex/' target='_blank'>码农终结者</a></p>"
-        + "<p>GitHub:<a style='color:white;' href='https://github.com/yyc-git' target='_blank'>YYC</a></p>",
+        + "<p>GitHub:<a style='color:white;' href='https://github.com/yyc-git/AncientWar' target='_blank'>AncientWar</a></p>"
+        + "<p>引擎:<a style='color:white;' href='https://github.com/yyc-git/YEngine2D' target='_blank'>YEngine2D</a></p>",
+    bowerSupport:"<br/><p>浏览器支持：Chrome, Firefox</p>",
     versionHistory: "<br/><p>版本历史：</p><dl style='margin-top:0px;'><dt>v0.1</dt><dd>发布第1版</dd>"
         + "<dt>v0.2</dt><dd>修复bug</dd><dd>优化寻路</dd>"
         + "</dl>",
