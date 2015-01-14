@@ -43,10 +43,6 @@
             $("#gameArea").show();
             $("#systemInfo").show();
         },
-        showDialogue: function (info) {
-            $("#dialogue").show();
-            $("#dialogue").html(info);
-        },
         showMessageBox: function (msg, callback, time) {
             $("#gameInfo").html(msg);
 
@@ -91,7 +87,7 @@
             $("#systemInfo").show();
             $("#systemInfo").html(info);
         },
-        showUserInfo:function(){
+        showUserInfo: function () {
             this.showSystemInfo(config.authorInfo + config.bowerSupport + config.versionHistory);
         },
         initEvent: function () {
@@ -113,71 +109,114 @@
                 LevelManager.getInstance().start();
             });
 
-//            $("#editArea").click(function () {
+//            $("#editArea").on("click", function(){
 //                $("#index").hide();
 //                $("#edit").show();
 //            });
 
-//            $("#mapEdit").click(function () {
+//            $("#mapEdit").on("click", function(){
 //                window.location.href = "./mapEdit.html";
 //            });
-//            $("#animEdit").click(function () {
+//            $("#animEdit").on("click", function(){
 //                window.location.href = "./animEdit.html";
 //            });
-//            $("#imgEdit").click(function () {
+//            $("#imgEdit").on("click", function(){
 //                window.location.href = "./imgEdit.html";
 //            });
 
-            $("#loadError").click(function () {
+            $("#loadError").on("click", function () {
                 $(this).hide();
                 LevelManager.getInstance().initAnimation();
             });
 
-            $("#enterGame").click(function () {
+            $("#enterGame").on("click", function () {
                 LevelManager.getInstance().enterGame();
             });
 
             //Initialize building construction buttons
-            $("#build_base").click(function () {
+            $("#build_base").on("click", function () {
                 window.effectLayer.build("base", BaseSprite);
             });
-            $("#build_tower").click(function () {
+            $("#build_tower").on("click", function () {
                 window.effectLayer.build("tower", TowerSprite);
             });
-            $("#build_shootingRange").click(function () {
+            $("#build_shootingRange").on("click", function () {
                 window.effectLayer.build("shootingRange", ShootingRangeSprite);
             });
 
 
-            $("#produce_farmer").click(function () {
+            $("#produce_farmer").on("click", function () {
                 window.entityLayer.produce("farmer", FarmerSprite);
             });
-            $("#produce_archer").click(function () {
+            $("#produce_archer").on("click", function () {
                 window.entityLayer.produce("archer", ArcherSprite);
             });
 
-            $("#moveAndAttack").click(function () {
+            $("#moveAndAttack").on("click", function () {
 //            window.effectLayer.command(MoveAndAttackCommand);
                 window.effectLayer.moveAndAttack();
             });
 
-            $("#systemIco img").click(function () {
-                $("#dialogue").hide();
+            $("#systemIco").on("click", function (e) {
+                e.stopPropagation();
 
-                if (self._isShow($("#menu"))) {
-                    YE.Director.getInstance().resume();
-                    $("#menu").hide();
+                if (self._isShow(self._getCenterBox())) {
+                    self._resumeGame();
                 }
                 else {
                     YE.Director.getInstance().pause();
-                    $("#menu").show();
+                    self._showMenuDom();
                 }
-
             });
+
+            this._getCenterBox().on("click", function (e) {
+                e.stopPropagation();
+            });
+
+            $("#gameArea").on("click", function (e) {
+                if (self._isShow(self._getCenterBox())) {
+                    self._resumeGame();
+                }
+            });
+        },
+        showCenterInfo: function (info) {
+            YE.Director.getInstance().pause();
+            this._showCenterInfoDom();
+            this._getCenterInfo().html(info)
+        },
+        _isNotMenuDom: function (jqObj) {
+            return jqObj.attr("id") !== "menu";
+        },
+        _getCenterBox: function () {
+            return $("#centerBox");
+        },
+        _getMenu: function () {
+            return $("#centerBox .menu");
+        },
+        _getCenterInfo: function () {
+            return $("#centerBox .info");
+        },
+        _showMenuDom: function () {
+//            YE.Director.getInstance().pause();
+            this._getCenterBox().show();
+            this._getCenterInfo().hide();
+            this._getMenu().show();
+        },
+        _showCenterInfoDom: function(){
+            this._getCenterBox().show();
+            this._getMenu().hide();
+            this._getCenterInfo().show();
+        },
+        _resumeGame: function () {
+            YE.Director.getInstance().resume();
+            this._getCenterBox().hide();
         },
         _isShow: function (jqObj) {
             return jqObj.css("display") !== "none";
         },
+//        _isHide: function(jqObj){
+//            return jqObj.css("display") === "none";
+//        },
         initHtml: function () {
             new YYC.Control.Button({
                 text: "退出游戏",
@@ -193,7 +232,7 @@
 
                 width: 200,
                 height: 50
-            }).renderTo("menu");
+            }).renderTo(this._getMenu());
 
             new YYC.Control.Button({
                 text: "查看作者信息",
@@ -202,14 +241,14 @@
                 addClass: "button",
 
                 onclick: function (e) {
-                    ui.showDialogue("<p style='margin-bottom: 50px;'>古代战争 v"
+                    ui.showCenterInfo("<p style='margin-bottom: 50px;'>古代战争 v"
                         + config.version + "</p>"
                         + config.authorInfo);
                 },
 
                 width: 200,
                 height: 50
-            }).renderTo("menu");
+            }).renderTo(this._getMenu());
         },
         getGameAreaSize: function () {
             var gameArea = $("#gameArea");

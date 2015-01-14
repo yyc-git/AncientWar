@@ -202,7 +202,7 @@ html, body, p {
     background-position: 0px -180px;
 }
 
-.gameArea #menu {
+.gameArea #centerBox .menu {
     display: none;
     background-image: url(../image/interface/menuBackground.jpg);
     background-repeat: no-repeat;
@@ -216,11 +216,11 @@ html, body, p {
     padding-top: 40px;
 }
 
-.gameArea #menu .button {
+.gameArea #centerBox .menu .button {
     margin: auto;
 }
 
-.gameArea #dialogue {
+.gameArea #centerBox .info {
     display: none;
     background-image: url(../image/interface/dialogue.png);
     background-repeat: no-repeat;
@@ -239,7 +239,7 @@ html, body, p {
     padding-top: 40px;
 }
 
-.gameArea #dialogue a {
+.gameArea #centerBox .info a {
     color: white;
 }
 

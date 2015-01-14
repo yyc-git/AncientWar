@@ -50,9 +50,10 @@
             </div>
 
         </div>
-        <div id="menu">
+        <div id="centerBox">
+            <div class="info"></div>
+            <div class="menu"></div>
         </div>
-        <div id="dialogue"></div>
         <canvas id="mapLayerCanvas" width="800" height="430"></canvas>
         <canvas id="smallMapBackgroundLayerCanvas" width="800" height="430"></canvas>
         <canvas id="smallMapEntityLayerCanvas" width="800" height="430"></canvas>
@@ -68,14 +69,17 @@
 </div>
 
 <script src="bower_components/yoop/yOOP.js"></script>
-<script src="bower_components/yengine2d/dist/yEngine2D.js"></script>
+<!--<script src="bower_components/yengine2d/dist/yEngine2D.js"></script>-->
+
+<script src="mine/yEngine2D/main.js"></script>
 
 <script>
 
 
     YE.main.setConfig({
         isDebug: false,
-        isSingleEngineFile: true,
+        isSingleEngineFile: false,
+        engineDir: "mine/yEngine2D/",
         userFilePaths: [
             "bower_components/jquery/jquery.js",
             "bower_components/yyctoolbox/tool/yTool.js",
