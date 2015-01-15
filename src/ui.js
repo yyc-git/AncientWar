@@ -202,7 +202,7 @@
             this._getCenterInfo().hide();
             this._getMenu().show();
         },
-        _showCenterInfoDom: function(){
+        _showCenterInfoDom: function () {
             this._getCenterBox().show();
             this._getMenu().hide();
             this._getCenterInfo().show();
@@ -217,7 +217,13 @@
 //        _isHide: function(jqObj){
 //            return jqObj.css("display") === "none";
 //        },
+        _resetUI: function () {
+            this._getCenterBox().hide();
+            $("#gameInfo").html("");
+        },
         initHtml: function () {
+            var self = this;
+
             new YYC.Control.Button({
                 text: "退出游戏",
 
@@ -226,8 +232,8 @@
 
                 onclick: function (e) {
                     LevelManager.getInstance().exit();
-                    $("#menu").hide();
-                    ui.showIndex();
+                    self._resetUI();
+                    self.showIndex();
                 },
 
                 width: 200,
@@ -241,7 +247,7 @@
                 addClass: "button",
 
                 onclick: function (e) {
-                    ui.showCenterInfo("<p style='margin-bottom: 50px;'>古代战争 v"
+                    self.showCenterInfo("<p style='margin-bottom: 50px;'>古代战争 v"
                         + config.version + "</p>"
                         + config.authorInfo);
                 },
