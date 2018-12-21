@@ -5,7 +5,7 @@
 该游戏基于YEngine2D引擎开发，具备生产、建造、资源采集、战斗、地图迷雾等RTS核心要素。
 ##游戏演示
 <strong style="color:red;">请在Chrome或Firefox浏览器中运行</strong>
-[演示地址](http://120.27.30.201/game/war/index.html)
+[演示地址](https://yyc-git.github.io/ancientWar/index.html)
 
 ![游戏截图](http://images.cnitblog.com/blog/419321/201411/092254360815863.png)
 ##运行
